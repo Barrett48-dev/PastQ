@@ -3,9 +3,11 @@ import React from 'react';
 import { Check } from 'lucide-react';
 
 export const ChipTag = ({ label, selected, onClick, variant = 'gold' }) => {
+    // The variant changes only the active accent; selection controls whether the checkmark is shown.
     const activeBorder = variant === 'gold' ? 'border-[#D97706] bg-[#141519]' : 'border-[#2F66F6] bg-[#141519]';
     const activeIcon = variant === 'gold' ? 'bg-[#D97706]' : 'bg-[#2F66F6]';
 
+    // Render a button rather than a passive pill so keyboard and pointer users share the same action.
     return (
     <button
             type="button"

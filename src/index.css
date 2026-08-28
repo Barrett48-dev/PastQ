@@ -1,7 +1,7 @@
-/* Tailwind provides the utility classes used throughout the React views. */
+/* Tailwind expands the utility classes used throughout the React views at build time. */
 @import "tailwindcss";
 
-/* Central color tokens keep the dark study workspace visually consistent. */
+/* Central color tokens document the design palette and provide stable fallbacks for global CSS. */
 :root {
   --bg-main: #0b0c0e;
   --surface-card: #141519;
@@ -13,7 +13,7 @@
   --text-secondary: #a1a1aa;
 }
 
-/* The body supplies the fallback canvas behind every full-screen view. */
+/* The body supplies the fallback canvas, text color, font, and viewport height behind every view. */
 body {
   background-color: var(--bg-main);
   color: var(--text-primary);

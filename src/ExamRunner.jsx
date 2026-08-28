@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Clock, CheckCircle2, AlertCircle, ArrowLeft, ArrowRight, RotateCcw, Send, Check, X } from 'lucide-react';
 
+// The standalone runner uses local questions so it can demonstrate the exam lifecycle without a backend.
 const SAMPLE_QUESTIONS = [
   // Local sample data keeps the runner functional before papers are loaded from an API.
   {
@@ -40,6 +41,7 @@ const SAMPLE_QUESTIONS = [
 ];
 
 export default function ExamRunner({ paperTitle = "Financial Accounting Paper 1 (2025)", durationMinutes = 15, onExit }) {
+  // Each piece of state represents one independent part of the attempt and drives a visible UI region.
   // Answers are keyed by question index so navigation does not lose selections.
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState({});
@@ -64,6 +66,7 @@ export default function ExamRunner({ paperTitle = "Financial Accounting Paper 1 
     return () => clearInterval(timer);
   }, [timeLeft, isSubmitted]);
 
+  // Keep timer formatting pure so it can be reused during every render without state changes.
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -94,11 +97,12 @@ export default function ExamRunner({ paperTitle = "Financial Accounting Paper 1 
     return score;
   };
 
+  // Derived values keep the render readable and ensure navigation/counts always reflect current state.
   const currentQ = SAMPLE_QUESTIONS[currentQuestionIndex];
   const totalQuestions = SAMPLE_QUESTIONS.length;
   const answeredCount = Object.keys(selectedAnswers).length;
 
-  // Score Screen View
+  // Once submitted, replace answer controls with an immutable score and question-by-question review.
   if (isSubmitted) {
     const score = calculateScore();
     const percentage = Math.round((score / totalQuestions) * 100);
@@ -161,7 +165,7 @@ export default function ExamRunner({ paperTitle = "Financial Accounting Paper 1 
     );
   }
 
-  // Active Test-Taking View
+  // Before submission, show one question at a time and preserve answers while the timer runs.
   return (
     <div className="min-h-screen bg-[#0B0C0E] text-white p-4 md:p-8 flex flex-col items-center justify-center">
       <div className="w-full max-w-2xl bg-[#141519] border border-[#26272E] rounded-3xl p-6 md:p-8 shadow-2xl space-y-6">

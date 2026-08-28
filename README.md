@@ -1,6 +1,6 @@
 # PastQ
 
-PastQ is a browser soon to be app is a past-question revision tool for secondary-school students preparing for GCE and similar examinations. It lets a student create a study profile, choose subjects, open a past paper, complete a timed multiple-choice attempt, review the score and explanations, and practise missed questions with flashcards.
+PastQ is a browser soon to be app is a past-question revision tool for secondary-school students preparing for GCE and similar examinations. It lets a student create a study profile, choose subjects, open a past paper, complete a timed multiple-choice attempt, review the score and explanations, and practice missed questions with flashcards.
 
 This repository is the frontend prototype. It is intentionally self-contained so the complete flow can be demonstrated without a backend.
 
@@ -41,6 +41,16 @@ src/
   utils/auth.js           Browser-storage account and session helpers
   index.css               Tailwind import and global design tokens
 ```
+
+## Code Reading Guide
+
+The application starts in `src/main.jsx`, where the global stylesheet is loaded and React mounts `App` in strict mode. `src/App.jsx` creates the router and owns cross-screen concerns: theme persistence, the active profile, login/onboarding visibility, and conversion of dashboard action IDs into routes. A successful login or registration returns a profile to `handleAuthSuccess`, which stores it under `pastq_user` and closes the authentication UI.
+
+The dashboard is a callback-driven view. `src/Dashboard.jsx` derives a greeting and resume card from `userData`, maps quick actions into route requests, and maps practical subjects into lab requests. The destination components under `src/components/` are self-contained prototypes: `StudyPlan` mutates an in-memory task list, `SmartAI` appends simulated delayed messages, `MyProgress` displays fixed metrics, and `SavedQuestions`/`Achievements` show placeholder or static records.
+
+The exam path has two implementations. `src/components/PracticeExam.jsx` is the current route-level mock list, while `src/ExamRunner.jsx` is a standalone timed question runner. `src/SubjectSearch.jsx` is the richer catalogue workflow: it filters hard-coded paper records, opens the PDF iframe, stores answer letters by question ID, grades on submit or timeout, and derives incorrect records for its private flashcard modal. `src/FlashcardDeck.jsx` exposes the same review interaction as a reusable standalone component.
+
+Reusable controls (`Button`, `ChipTag`, `InputField`, `SelectionCard`, `ThemeCard`, and `WizardHeader`) keep common visual and interaction patterns in small prop-driven components. `src/PracticalLab.jsx` uses the same route for two experiments: a JavaScript editor with captured console output and a projectile-motion calculator whose SVG trajectory is derived from velocity, angle, and gravity. `src/index.css` explains the global design tokens and Tailwind import; `src/App.css` is reserved for future selectors.
 
 ## Run Locally
 

@@ -2,6 +2,7 @@
 import React from 'react';
 
 export const Button = ({ children, onClick, type = 'button', variant = 'primary', className = '' }) => {
+    // Shared geometry is combined with a semantic variant and caller-specific utility overrides.
     const baseStyles = 'w-full py-4 px-6 rounded-xl font-semibold text-base transition-all duration-200 active:scale-[0.99] flex items-center justify-center';
 
     // Keep the visual vocabulary in one place so forms do not duplicate button styles.
@@ -11,6 +12,7 @@ export const Button = ({ children, onClick, type = 'button', variant = 'primary'
     ghost: 'bg-transparent text-[#A1A1AA] hover:text-white',
     };
 
+    // Keep the component intentionally small: callers provide button content, while this component owns styling.
     return (
         <button
             type={type}

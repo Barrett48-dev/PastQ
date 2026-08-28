@@ -9,6 +9,7 @@ import { registerUser } from '../utils/auth';
 const TOTAL_STEPS = 7;
 
 export default function OnboardingWizard({ onComplete, onCancel }) {
+  // The wizard retains all fields while moving between screens, allowing users to revise earlier answers.
   const [step, setStep] = useState(1);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -27,11 +28,13 @@ export default function OnboardingWizard({ onComplete, onCancel }) {
     sessionDuration: '20 min',
   });
 
+  // Generic field updater keeps every controlled input synchronized with the single profile draft.
   const updateField = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     setErrorMessage('');
   };
 
+  // Subject selection is set-like: clicking an existing subject removes it, otherwise it is appended.
   const toggleSubject = (subject) => {
     setFormData((prev) => {
       const exists = prev.selectedSubjects.includes(subject);
@@ -45,7 +48,7 @@ export default function OnboardingWizard({ onComplete, onCancel }) {
     setErrorMessage('');
   };
 
-  // Step Validation Logic
+  // Validate only the fields required by the current screen before advancing or registering.
   const handleNext = () => {
     setErrorMessage('');
 
@@ -118,6 +121,7 @@ export default function OnboardingWizard({ onComplete, onCancel }) {
     }
   };
 
+  // Back navigation changes only the step and clears an old validation message.
   const handleBack = () => {
     setErrorMessage('');
     if (step > 1) {
@@ -125,17 +129,19 @@ export default function OnboardingWizard({ onComplete, onCancel }) {
     }
   };
 
+  // Track-specific options make the subject screen responsive to the earlier academic choice.
   const subjectOptions = {
     Science: ['Mathematics', 'Physics', 'Chemistry', 'Biology', 'Computer Science', 'Further Math'],
     Arts: ['English Language', 'Literature in English', 'History', 'Geography', 'French', 'Philosophy'],
     Commercial: ['Accounting', 'Economics', 'Commerce', 'Management', 'Costing', 'Business Law'],
   };
 
+  // The render contains stable chrome plus one conditional step body at a time.
   return (
     <div className="min-h-screen bg-[#0B0C0E] text-white flex flex-col items-center justify-center p-4 md:p-8">
       <div className="w-full max-w-xl bg-[#141519] border border-[#26272E] rounded-3xl p-6 md:p-8 shadow-2xl space-y-6 relative">
         
-        {/* Top Header Controls */}
+        {/* Header identifies the flow and exposes cancellation without losing the dashboard session. */}
         <div className="flex items-center justify-between pb-4 border-b border-[#26272E]">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-[#2F66F6]/10 border border-[#2F66F6]/30 rounded-xl flex items-center justify-center text-[#2F66F6]">
@@ -154,7 +160,7 @@ export default function OnboardingWizard({ onComplete, onCancel }) {
           </button>
         </div>
 
-        {/* Step Progress Bar */}
+        {/* Progress reflects the one-based step number as both text and a proportional bar. */}
         <div className="space-y-2">
           <div className="flex justify-between items-center text-xs">
             <span className="text-[#A1A1AA]">Step {step} of {TOTAL_STEPS}</span>
@@ -170,7 +176,7 @@ export default function OnboardingWizard({ onComplete, onCancel }) {
           </div>
         </div>
 
-        {/* Error Notification */}
+        {/* Validation errors are rendered above the step so they remain visible after any failed advance. */}
         {errorMessage && (
           <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl flex items-center space-x-2 text-red-400 text-xs">
             <AlertCircle size={16} className="shrink-0" />
@@ -178,10 +184,10 @@ export default function OnboardingWizard({ onComplete, onCancel }) {
           </div>
         )}
 
-        {/* Dynamic Wizard Steps */}
+        {/* Exactly one of the seven step panels is mounted according to `step`. */}
         <div className="space-y-4 py-2">
           
-          {/* STEP 1: Personal Details */}
+          {/* STEP 1 collects the identity fields used for the profile and greeting. */}
           {step === 1 && (
             <div className="space-y-4">
               <div>
@@ -223,7 +229,7 @@ export default function OnboardingWizard({ onComplete, onCancel }) {
             </div>
           )}
 
-          {/* STEP 2: Password Security */}
+          {/* STEP 2 collects and confirms the prototype password before account creation. */}
           {step === 2 && (
             <div className="space-y-4">
               <div>
@@ -255,7 +261,7 @@ export default function OnboardingWizard({ onComplete, onCancel }) {
             </div>
           )}
 
-          {/* STEP 3: School Info */}
+          {/* STEP 3 captures school context for future paper personalization. */}
           {step === 3 && (
             <div className="space-y-4">
               <div>
@@ -275,7 +281,7 @@ export default function OnboardingWizard({ onComplete, onCancel }) {
             </div>
           )}
 
-          {/* STEP 4: Track & Specialty */}
+          {/* STEP 4 chooses a department and records the student's class or specialty. */}
           {step === 4 && (
             <div className="space-y-4">
               <div>
@@ -316,7 +322,7 @@ export default function OnboardingWizard({ onComplete, onCancel }) {
             </div>
           )}
 
-          {/* STEP 5: Subject Selection */}
+          {/* STEP 5 toggles the track's subject list and requires at least one selection. */}
           {step === 5 && (
             <div className="space-y-4">
               <div>
@@ -346,7 +352,7 @@ export default function OnboardingWizard({ onComplete, onCancel }) {
             </div>
           )}
 
-          {/* STEP 6: Primary Prep Goal */}
+          {/* STEP 6 records the learning outcome the dashboard should emphasize. */}
           {step === 6 && (
             <div className="space-y-4">
               <div>
@@ -378,7 +384,7 @@ export default function OnboardingWizard({ onComplete, onCancel }) {
             </div>
           )}
 
-          {/* STEP 7: Daily Target Duration */}
+          {/* STEP 7 records a daily commitment and provides the final registration action. */}
           {step === 7 && (
             <div className="space-y-4">
               <div>
@@ -406,7 +412,7 @@ export default function OnboardingWizard({ onComplete, onCancel }) {
 
         </div>
 
-        {/* Wizard Controls */}
+        {/* Navigation controls are shared by every step; Continue becomes submission on step seven. */}
         <div className="pt-4 border-t border-[#26272E] flex items-center justify-between">
           <button
             type="button"

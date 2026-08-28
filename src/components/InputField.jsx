@@ -3,9 +3,11 @@ import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 
 export const InputField = ({ label, type = 'text', placeholder, icon: Icon, value, onChange, name }) => {
+    // Visibility state affects only password inputs; all other values remain controlled by the parent.
     const [showPassword, setShowPassword] = useState(false);
     const isPassword = type === 'password';
 
+    // Layout conditionally reserves space for the leading icon and trailing visibility toggle.
     return (
     <div className="w-full space-y-2 text-left">
     {label && (

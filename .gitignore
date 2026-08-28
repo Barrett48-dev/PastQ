@@ -1,4 +1,4 @@
-# Logs
+# Runtime and package-manager logs are local diagnostics, not source files for GitHub.
 logs
 *.log
 npm-debug.log*
@@ -12,7 +12,7 @@ dist
 dist-ssr
 *.local
 
-# Editor directories and files
+# IDE metadata is ignored except for the explicitly shareable VS Code extensions file.
 .vscode/*
 !.vscode/extensions.json
 .idea

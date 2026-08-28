@@ -1,149 +1,126 @@
-// Combined sign-in and sign-up modal retained for flows that need one auth surface.
 import React, { useState } from 'react';
-import { Mail, Lock, User, BookOpen, AlertCircle, ArrowRight } from 'lucide-react';
-import { loginUser, registerUser } from '../utils/auth';
+import { X, Mail, Lock, User } from 'lucide-react';
+import { loginUser } from '../utils/auth';
 
-export default function AuthModal({ onAuthSuccess }) {
-  const [isSignUp, setIsSignUp] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    selectedSubjects: ['Financial Accounting', 'Economics']
-  });
-  const [errorMessage, setErrorMessage] = useState('');
+export default function AuthModal({ 
+  isOpen, 
+  mode = 'login', 
+  isDarkMode = true, 
+  onClose, 
+  onSuccess, 
+  onStartSignup 
+}) {
+  // The modal keeps transient credentials and errors local; App receives only a successful user object.
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
-  const handleChange = (e) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-    setErrorMessage('');
-  };
+  // Avoid mounting the overlay at all when the parent has closed it.
+  if (!isOpen) return null;
 
+  // Validate the two required fields, delegate credential lookup, and report failures inline.
   const handleSubmit = (e) => {
     e.preventDefault();
-    setErrorMessage('');
+    setError('');
 
-    if (!formData.email || !formData.password || (isSignUp && !formData.name)) {
-      setErrorMessage('Please fill in all required fields.');
+    if (!email || !password) {
+      setError('Please fill in all required fields.');
       return;
     }
 
-    if (isSignUp) {
-      const result = registerUser(formData);
-      if (!result.success) {
-        setErrorMessage(result.message);
-        return;
-      }
-      // Auto login after successful sign up
-      const loginRes = loginUser(formData.email, formData.password);
-      if (loginRes.success) onAuthSuccess(loginRes.user);
-    } else {
-      const result = loginUser(formData.email, formData.password);
-      if (!result.success) {
-        setErrorMessage(result.message);
-        return;
-      }
-      onAuthSuccess(result.user);
+    const result = loginUser(email, password);
+    if (!result.success) {
+      setError(result.message);
+      return;
     }
+
+    onSuccess(result.user);
   };
 
+  // The overlay uses the shared theme flag to keep the modal readable over either dashboard theme.
   return (
-    <div className="fixed inset-0 z-50 bg-[#0B0C0E]/90 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-[#141519] border border-[#26272E] rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl">
-        
-        {/* Toggle Header */}
-        <div className="flex bg-[#1A1B20] p-1 rounded-2xl border border-[#26272E]">
-          <button
-            type="button"
-            onClick={() => { setIsSignUp(false); setErrorMessage(''); }}
-            className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all ${
-              !isSignUp ? 'bg-[#2F66F6] text-white' : 'text-[#A1A1AA] hover:text-white'
-            }`}
-          >
-            Sign In
-          </button>
-          <button
-            type="button"
-            onClick={() => { setIsSignUp(true); setErrorMessage(''); }}
-            className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all ${
-              isSignUp ? 'bg-[#2F66F6] text-white' : 'text-[#A1A1AA] hover:text-white'
-            }`}
-          >
-            Create Account
-          </button>
-        </div>
-
-        <div className="space-y-1 text-center">
-          <h2 className="text-xl font-black text-white">
-            {isSignUp ? 'Create your account' : 'Welcome back'}
-          </h2>
-          <p className="text-xs text-[#A1A1AA]">
-            {isSignUp ? 'Enter your details to register and save progress.' : 'Sign in to access your saved exams and flashcards.'}
-          </p>
-        </div>
-
-        {errorMessage && (
-          <div className="flex items-center space-x-2 bg-red-500/10 border border-red-500/30 p-3 rounded-xl text-red-400 text-xs">
-            <AlertCircle size={16} className="shrink-0" />
-            <span>{errorMessage}</span>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+      <div 
+        className={`w-full max-w-md rounded-3xl border p-6 shadow-2xl transition-all ${
+          isDarkMode ? 'bg-[#141519] border-[#26272E] text-white' : 'bg-white border-slate-200 text-slate-900'
+        }`}
+      >
+        {/* Modal heading and close control. */}
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h3 className="text-xl font-extrabold tracking-tight">Welcome Back to PastQ</h3>
+            <p className="text-xs text-slate-400 mt-1">Sign in to access your saved questions & lab history</p>
           </div>
-        )}
+          <button 
+            onClick={onClose}
+            className="p-1.5 rounded-full hover:bg-slate-500/10 text-slate-400 hover:text-slate-200 transition-colors"
+          >
+            <X size={20} />
+          </button>
+        </div>
 
+        {/* Credential form: browser-required fields provide a second validation layer. */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          {isSignUp && (
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold uppercase text-[#A1A1AA]">Full Name</label>
-              <div className="relative">
-                <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#A1A1AA]" />
-                <input
-                  type="text"
-                  name="name"
-                  placeholder="John Doe"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-2.5 bg-[#1A1B20] border border-[#26272E] rounded-xl text-xs text-white placeholder-[#A1A1AA] focus:outline-none focus:border-[#2F66F6]"
-                />
-              </div>
+          {error && (
+            <div className="p-3 text-xs bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl">
+              {error}
             </div>
           )}
 
-          <div className="space-y-1">
-            <label className="text-[10px] font-bold uppercase text-[#A1A1AA]">Email Address</label>
+          <div>
+            <label className="block text-xs font-semibold mb-1.5 text-slate-400">Email Address</label>
             <div className="relative">
-              <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#A1A1AA]" />
+              <Mail size={16} className="absolute left-3.5 top-3 text-slate-400" />
               <input
                 type="email"
-                name="email"
+                required
                 placeholder="student@example.com"
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full pl-10 pr-4 py-2.5 bg-[#1A1B20] border border-[#26272E] rounded-xl text-xs text-white placeholder-[#A1A1AA] focus:outline-none focus:border-[#2F66F6]"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={`w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-all ${
+                  isDarkMode ? 'bg-[#1A1B20] border-[#26272E] focus:border-[#2F66F6]' : 'bg-slate-50 border-slate-200 focus:border-[#2F66F6]'
+                }`}
               />
             </div>
           </div>
 
-          <div className="space-y-1">
-            <label className="text-[10px] font-bold uppercase text-[#A1A1AA]">Password</label>
+          <div>
+            <label className="block text-xs font-semibold mb-1.5 text-slate-400">Password</label>
             <div className="relative">
-              <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#A1A1AA]" />
+              <Lock size={16} className="absolute left-3.5 top-3 text-slate-400" />
               <input
                 type="password"
-                name="password"
+                required
                 placeholder="••••••••"
-                value={formData.password}
-                onChange={handleChange}
-                className="w-full pl-10 pr-4 py-2.5 bg-[#1A1B20] border border-[#26272E] rounded-xl text-xs text-white placeholder-[#A1A1AA] focus:outline-none focus:border-[#2F66F6]"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className={`w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm outline-none transition-all ${
+                  isDarkMode ? 'bg-[#1A1B20] border-[#26272E] focus:border-[#2F66F6]' : 'bg-slate-50 border-slate-200 focus:border-[#2F66F6]'
+                }`}
               />
             </div>
           </div>
 
           <button
             type="submit"
-            className="w-full py-3 bg-[#2F66F6] hover:bg-[#1E52E0] text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center space-x-2 shadow-lg shadow-[#2F66F6]/20 mt-2"
+            className="w-full mt-2 py-3 bg-[#2F66F6] hover:bg-[#1E52E0] text-white font-bold text-sm rounded-xl transition-all shadow-lg shadow-[#2F66F6]/20"
           >
-            <span>{isSignUp ? 'Register Account' : 'Sign In'}</span>
-            <ArrowRight size={14} />
+            Sign In
           </button>
         </form>
+
+        {/* Registration link returns control to the parent onboarding flow. */}
+        <div className="mt-6 pt-4 border-t border-slate-800/50 text-center text-xs text-slate-400">
+          <p>
+            Don't have an account?{' '}
+            <button 
+              onClick={onStartSignup} 
+              className="text-[#2F66F6] font-semibold hover:underline ml-1"
+            >
+              Start 7-Step Setup
+            </button>
+          </p>
+        </div>
       </div>
     </div>
   );

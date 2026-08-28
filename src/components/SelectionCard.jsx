@@ -4,6 +4,7 @@ import { Check } from 'lucide-react';
 
 export const SelectionCard = ({ title, subtitle, icon: Icon, selected, onClick, type = 'radio' }) => {
     // `type` remains part of the public API for future checkbox/radio variations.
+// The visual state is derived from selected; the parent owns the actual choice and click behavior.
 return (
     <div
     onClick={onClick}

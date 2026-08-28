@@ -6,6 +6,7 @@ import {
   RotateCw, RefreshCw
 } from 'lucide-react';
 
+// Each paper combines catalogue metadata, a viewer URL, and answer-key explanations for demo grading.
 const ALL_SUBJECT_PAPERS = [
   // Demo paper records contain both viewer metadata and grading explanations.
   { 
@@ -42,6 +43,7 @@ const ALL_SUBJECT_PAPERS = [
 
 // ----------------- FLASHCARD DECK COMPONENT -----------------
 function FlashcardDeck({ incorrectQuestions, subjectTitle, onExit }) {
+  // This private copy keeps missed-question review available directly inside the exam workflow.
   // This local modal implementation mirrors the standalone deck used elsewhere in the app.
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -50,6 +52,7 @@ function FlashcardDeck({ incorrectQuestions, subjectTitle, onExit }) {
 
   const currentQuestion = incorrectQuestions[currentIndex];
 
+  // Reset the card face, optionally record mastery, and either advance or switch to completion.
   const handleNext = (wasMastered = false) => {
     setIsFlipped(false);
     
@@ -64,6 +67,7 @@ function FlashcardDeck({ incorrectQuestions, subjectTitle, onExit }) {
     }
   };
 
+  // Restart the same missed-question set without changing the completed exam result.
   const handleRestart = () => {
     setCurrentIndex(0);
     setMasteredCount(0);
@@ -71,6 +75,7 @@ function FlashcardDeck({ incorrectQuestions, subjectTitle, onExit }) {
     setIsCompleted(false);
   };
 
+  // Completion replaces the card so totals and the next actions are unambiguous.
   if (isCompleted) {
     return (
       <div className="fixed inset-0 z-50 bg-[#0B0C0E]/95 flex items-center justify-center p-4">
@@ -114,6 +119,7 @@ function FlashcardDeck({ incorrectQuestions, subjectTitle, onExit }) {
     );
   }
 
+  // Active cards expose the missed prompt first and reveal the correction only after a flip.
   return (
     <div className="fixed inset-0 z-50 bg-[#0B0C0E]/95 flex flex-col items-center justify-center p-4">
       <div className="max-w-xl w-full flex items-center justify-between mb-6">
@@ -192,6 +198,7 @@ function FlashcardDeck({ incorrectQuestions, subjectTitle, onExit }) {
 
 // ----------------- MAIN SUBJECT SEARCH COMPONENT -----------------
 export default function SubjectSearch({ userData, onBackToDashboard }) {
+  // Profile subjects drive the filter tabs, with demo subjects ensuring the guest flow is usable.
   // Fall back to demo subjects when a profile has not selected any subjects yet.
   const userSubjects = userData?.selectedSubjects?.length > 0 
     ? userData.selectedSubjects 
@@ -296,6 +303,7 @@ export default function SubjectSearch({ userData, onBackToDashboard }) {
       }));
   };
 
+  // The page has two top-level modes: catalogue browsing and a modal exam workspace.
   return (
     <div className="min-h-screen bg-[#0B0C0E] text-white p-4 md:p-8 font-sans">
       
@@ -312,7 +320,7 @@ export default function SubjectSearch({ userData, onBackToDashboard }) {
       {activePdfPaper ? (
         <div className="fixed inset-0 z-40 bg-[#0B0C0E]/95 flex flex-col">
           
-          {/* Header Toolbar */}
+          {/* Toolbar closes the exam, identifies the paper, shows time, and controls PDF zoom. */}
           <div className="h-16 bg-[#141519] border-b border-[#26272E] px-4 md:px-6 flex items-center justify-between shrink-0">
             <div className="flex items-center space-x-3">
               <button
@@ -327,7 +335,7 @@ export default function SubjectSearch({ userData, onBackToDashboard }) {
               </div>
             </div>
 
-            {/* Live Countdown Timer */}
+            {/* The timer disappears after grading so the result view has no active deadline. */}
             {!isSubmitted && (
               <div className={`flex items-center space-x-2 px-3 py-1.5 rounded-xl border text-xs font-mono font-bold ${
                 timeLeft < 180 
@@ -339,7 +347,7 @@ export default function SubjectSearch({ userData, onBackToDashboard }) {
               </div>
             )}
 
-            {/* Controls: Zoom */}
+            {/* Zoom changes only the iframe wrapper scale, leaving answer state untouched. */}
             <div className="flex items-center space-x-2 bg-[#1A1B20] border border-[#26272E] p-1 rounded-xl text-xs">
               <button 
                 onClick={() => setZoomLevel((z) => Math.max(50, z - 25))} 
@@ -364,10 +372,10 @@ export default function SubjectSearch({ userData, onBackToDashboard }) {
             </button>
           </div>
 
-          {/* Main Workspace */}
+          {/* Workspace pairs the external paper with the local answer and grading panel. */}
           <div className="flex-1 flex overflow-hidden">
             
-            {/* Left Side: PDF Document Viewer */}
+            {/* Left side embeds the selected paper and applies the current zoom level. */}
             <div className="flex-1 bg-[#1A1B20] p-4 flex justify-center overflow-auto">
               <div 
                 className="w-full h-full max-w-4xl transition-all duration-200" 
@@ -381,10 +389,10 @@ export default function SubjectSearch({ userData, onBackToDashboard }) {
               </div>
             </div>
 
-            {/* Right Side: Interactive Answer Sheet & Grading Panel */}
+            {/* Right side switches between answer collection and graded explanations. */}
             <div className="w-96 bg-[#141519] border-l border-[#26272E] p-4 flex flex-col justify-between overflow-y-auto">
               
-              {/* STATE A: ACTIVE EXAM SHEET */}
+              {/* State A: collect one A-D choice for every question until submission. */}
               {!isSubmitted ? (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -398,7 +406,7 @@ export default function SubjectSearch({ userData, onBackToDashboard }) {
 
                   <h3 className="text-xs font-bold text-white">Select Your Answers</h3>
 
-                  {/* Answer Bubbles */}
+                  {/* Answer bubbles are generated from the paper's question IDs and answer letters. */}
                   <div className="space-y-2.5 pt-1">
                     {activePdfPaper.questions.map((q) => (
                       <div key={q.id} className="p-3 bg-[#1A1B20] rounded-xl border border-[#26272E] space-y-2">
@@ -439,9 +447,9 @@ export default function SubjectSearch({ userData, onBackToDashboard }) {
                 </div>
               ) : (
                 
-                /* STATE B: GRADED RESULTS & EXPLANATIONS PANEL */
+                /* State B: freeze choices and explain every correct or incorrect result. */
                 <div className="space-y-5">
-                  {/* Score Card */}
+                  {/* Score card summarizes the percentage and the prototype's 50% pass threshold. */}
                   <div className={`p-4 rounded-2xl border text-center space-y-2 ${
                     examResult.passed 
                       ? 'bg-green-500/10 border-green-500/30 text-green-400' 
@@ -459,7 +467,7 @@ export default function SubjectSearch({ userData, onBackToDashboard }) {
                     </span>
                   </div>
 
-                  {/* PRACTICE MISSED ITEMS BUTTON */}
+                  {/* Missed items are transformed into the local flashcard deck on demand. */}
                   {getIncorrectQuestions().length > 0 && (
                     <button
                       onClick={() => setShowFlashcards(true)}
@@ -470,7 +478,7 @@ export default function SubjectSearch({ userData, onBackToDashboard }) {
                     </button>
                   )}
 
-                  {/* Step-by-Step Question Explanations */}
+                  {/* Each explanation compares the stored user choice with the answer key. */}
                   <div className="space-y-3">
                     <h3 className="text-xs font-bold text-white uppercase tracking-wider text-[#A1A1AA]">Detailed Explanations</h3>
                     
@@ -523,10 +531,10 @@ export default function SubjectSearch({ userData, onBackToDashboard }) {
         </div>
       ) : null}
 
-      {/* ----------------- SUBJECT DASHBOARD SELECTION ----------------- */}
+      {/* Catalogue mode: subject tabs, title search, and launch cards for matching papers. */}
       <div className="max-w-5xl mx-auto space-y-6">
         
-        {/* Navigation */}
+        {/* Navigation returns to the dashboard without changing the selected profile. */}
         <div className="flex items-center justify-between">
           <button
             onClick={onBackToDashboard}
@@ -537,7 +545,7 @@ export default function SubjectSearch({ userData, onBackToDashboard }) {
           </button>
         </div>
 
-        {/* Enrolled Subject Filter Tabs */}
+        {/* Subject tabs narrow the catalogue before the title query is applied. */}
         <div className="flex items-center space-x-2 overflow-x-auto pb-2">
           {userSubjects.map((subject) => (
             <button
@@ -554,7 +562,7 @@ export default function SubjectSearch({ userData, onBackToDashboard }) {
           ))}
         </div>
 
-        {/* Search Bar */}
+        {/* Search is controlled input; each keystroke recomputes the filtered paper list. */}
         <div className="relative">
           <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#A1A1AA]" />
           <input
@@ -566,7 +574,7 @@ export default function SubjectSearch({ userData, onBackToDashboard }) {
           />
         </div>
 
-        {/* Papers List */}
+        {/* Matching records become launch cards that initialize a fresh timed attempt. */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {subjectPapers.map((paper) => (
             <div key={paper.id} className="bg-[#141519] border border-[#26272E] p-5 rounded-2xl space-y-4">

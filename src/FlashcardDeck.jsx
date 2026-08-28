@@ -3,12 +3,14 @@ import React, { useState } from 'react';
 import { ArrowLeft, RotateCw, CheckCircle2, RefreshCw, Sparkles, BookOpen } from 'lucide-react';
 
 export default function FlashcardDeck({ incorrectQuestions, subjectTitle, onExit }) {
+  // This modal owns only the current review session; the parent remains responsible for supplying the deck.
   // Progress is local to this review session and resets when the deck restarts.
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [masteredCount, setMasteredCount] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
 
+  // The index is safe while the deck is active because completion is set after the final card is rated.
   const currentQuestion = incorrectQuestions[currentIndex];
 
   // Close the current card, optionally count it as mastered, and advance or finish.
@@ -34,6 +36,7 @@ export default function FlashcardDeck({ incorrectQuestions, subjectTitle, onExit
     setIsCompleted(false);
   };
 
+  // Completion is a separate view so the learner can see totals, restart, or return to the exam.
   if (isCompleted) {
     return (
       <div className="fixed inset-0 z-50 bg-[#0B0C0E]/95 flex items-center justify-center p-4">
@@ -77,10 +80,11 @@ export default function FlashcardDeck({ incorrectQuestions, subjectTitle, onExit
     );
   }
 
+  // Active review alternates between the prompt and explanation sides of the current card.
   return (
     <div className="fixed inset-0 z-50 bg-[#0B0C0E]/95 flex flex-col items-center justify-center p-4">
       
-      {/* Top Header */}
+      {/* Header exposes exit navigation and the learner's position within the deck. */}
       <div className="max-w-xl w-full flex items-center justify-between mb-6">
         <button
           onClick={onExit}
@@ -94,7 +98,7 @@ export default function FlashcardDeck({ incorrectQuestions, subjectTitle, onExit
         </span>
       </div>
 
-      {/* Flip Card Area */}
+      {/* Clicking the card toggles between the missed prompt and its correction/explanation. */}
       <div 
         onClick={() => setIsFlipped(!isFlipped)}
         className="max-w-xl w-full h-80 bg-[#141519] border border-[#26272E] hover:border-[#2F66F6]/50 rounded-3xl p-6 flex flex-col justify-between cursor-pointer transition-all shadow-2xl relative select-none"
@@ -109,7 +113,7 @@ export default function FlashcardDeck({ incorrectQuestions, subjectTitle, onExit
           </span>
         </div>
 
-        {/* Card Content */}
+        {/* Card content is mutually exclusive so the answer is hidden until the learner commits to a flip. */}
         <div className="my-auto text-center px-4 space-y-3">
           {!isFlipped ? (
             <div className="space-y-2">
@@ -138,7 +142,7 @@ export default function FlashcardDeck({ incorrectQuestions, subjectTitle, onExit
         </div>
       </div>
 
-      {/* Action Controls */}
+      {/* Rating controls advance the deck and optionally increment the mastery count. */}
       <div className="max-w-xl w-full flex space-x-3 mt-6">
         <button
           onClick={() => handleNext(false)}

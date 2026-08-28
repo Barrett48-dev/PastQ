@@ -2,6 +2,7 @@
 import React from 'react';
 
 export const WizardHeader = ({ tagText, title, subtitle, totalSteps = 3, currentStep = 1 }) => {
+// Progress segments are generated from the configured total so the header works for differently sized wizards.
 return (
     <div className="w-full space-y-3 text-left">
     <div className="flex items-center justify-between">

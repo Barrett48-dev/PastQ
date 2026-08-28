@@ -3,8 +3,10 @@ import React from 'react';
 import { Sun, Moon, Check } from 'lucide-react';
 
 export const ThemeCard = ({ type = 'dark', selected, onClick }) => {
+// Convert the public theme label into the boolean used by the preview's conditional styles.
 const isDark = type === 'dark';
 
+// The card is a visual selector; its preview mirrors the selected theme without changing global state itself.
 return (
     <div
     onClick={onClick}

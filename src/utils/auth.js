@@ -1,89 +1,48 @@
-// Browser-only persistence used by this frontend prototype; replace with an API for production.
-const USERS_KEY = 'app_registered_users_v1';
-const SESSION_KEY = 'app_active_session_v1';
-
-/**
- * Registers a new user account into persistent storage.
- */
+// Registration stores prototype accounts locally; production authentication must move this boundary server-side.
 export function registerUser(userData) {
   try {
-    const existingUsers = JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
-
-    // Check for duplicate account by email
-    const duplicate = existingUsers.find(
-      (u) => u.email?.toLowerCase() === userData.email?.toLowerCase()
-    );
-
-    if (duplicate) {
-      return { success: false, message: 'An account with this email already exists.' };
+    // Read the complete account collection because localStorage has no query/update primitive.
+    const existingUsers = JSON.parse(localStorage.getItem('pastq_registered_users') || '[]');
+    
+    // Email is the unique login key, compared case-insensitively for predictable identity matching.
+    const userExists = existingUsers.some(user => user.email.toLowerCase() === userData.email.toLowerCase());
+    if (userExists) {
+      return { success: false, message: 'An account with this email address already exists.' };
     }
 
+    // Copy onboarding fields and attach the dashboard's initial resume card in one profile object.
     const newUser = {
+      id: Date.now().toString(),
       ...userData,
-      createdAt: new Date().toISOString(),
+      lastStudied: {
+        title: userData.selectedSubjects[0] || 'Mathematics',
+        paper: '2021 – Paper 2',
+        progress: 0,
+        id: 'math-2021-p2'
+      }
     };
 
+    // Persist only after validation succeeds, then return the same profile to the caller for session state.
     existingUsers.push(newUser);
-    localStorage.getItem(USERS_KEY);
-    localStorage.setItem(USERS_KEY, JSON.stringify(existingUsers));
-
+    localStorage.setItem('pastq_registered_users', JSON.stringify(existingUsers));
+    
     return { success: true, user: newUser };
-  } catch (error) {
-    return { success: false, message: 'Failed to save account registration.' };
+  } catch (err) {
+    return { success: false, message: 'Failed to save registration data.' };
   }
 }
 
-/**
- * Validates login credentials and persists active session.
- */
-export function loginUser(email, password, rememberMe = false) {
-  try {
-    const users = JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
-    const user = users.find((u) => u.email?.toLowerCase() === email.toLowerCase());
+// Login searches the locally stored accounts and returns a uniform success/failure result for the UI.
+export function loginUser(email, password) {
+  // The prototype compares the plaintext password directly; this is intentionally documented as non-production.
+  const existingUsers = JSON.parse(localStorage.getItem('pastq_registered_users') || '[]');
+  const user = existingUsers.find(
+    u => u.email.toLowerCase() === email.toLowerCase() && u.password === password
+  );
 
-    if (!user) {
-      return { success: false, message: 'No account found with this email.' };
-    }
-
-    if (user.password !== password) {
-      return { success: false, message: 'Invalid password. Please try again.' };
-    }
-
-    // Clear any previous active session across both storages
-    localStorage.removeItem(SESSION_KEY);
-    sessionStorage.removeItem(SESSION_KEY);
-
-    // Save session based on 'Remember Me' preference
-    const targetStorage = rememberMe ? localStorage : sessionStorage;
-    targetStorage.setItem(SESSION_KEY, JSON.stringify(user));
-
-    return { success: true, user };
-  } catch (error) {
-    return { success: false, message: 'An unexpected error occurred during login.' };
+  if (!user) {
+    return { success: false, message: 'Invalid email or password.' };
   }
-}
 
-/**
- * Retrieves active session on app startup (checks both storages).
- */
-export function getActiveSession() {
-  try {
-    const localSession = localStorage.getItem(SESSION_KEY);
-    if (localSession) return JSON.parse(localSession);
-
-    const sessionOnly = sessionStorage.getItem(SESSION_KEY);
-    if (sessionOnly) return JSON.parse(sessionOnly);
-
-    return null;
-  } catch (error) {
-    return null;
-  }
-}
-
-/**
- * Clears active session on logout.
- */
-export function logoutUser() {
-  localStorage.removeItem(SESSION_KEY);
-  sessionStorage.removeItem(SESSION_KEY);
+  return { success: true, user };
 }
