@@ -1,3 +1,5 @@
+// Dashboard entry/placeholder for the Smart AI experience.
+// Modify the launcher here; message generation and conversation state belong in AskAIPage.jsx.
 import React, { useState } from 'react';
 import { ArrowLeft, Sparkles, Send, Bot, User } from 'lucide-react';
 

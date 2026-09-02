@@ -1,48 +1,71 @@
-// Registration stores prototype accounts locally; production authentication must move this boundary server-side.
-export function registerUser(userData) {
-  try {
-    // Read the complete account collection because localStorage has no query/update primitive.
-    const existingUsers = JSON.parse(localStorage.getItem('pastq_registered_users') || '[]');
-    
-    // Email is the unique login key, compared case-insensitively for predictable identity matching.
-    const userExists = existingUsers.some(user => user.email.toLowerCase() === userData.email.toLowerCase());
-    if (userExists) {
-      return { success: false, message: 'An account with this email address already exists.' };
-    }
+// src/utils/auth.js
+// Browser-storage authentication adapter for the prototype account and current-user contracts.
+// Modify storage keys and schema here when auth changes; production code should replace this module with an API client.
 
-    // Copy onboarding fields and attach the dashboard's initial resume card in one profile object.
-    const newUser = {
-      id: Date.now().toString(),
-      ...userData,
-      lastStudied: {
-        title: userData.selectedSubjects[0] || 'Mathematics',
-        paper: '2021 – Paper 2',
-        progress: 0,
-        id: 'math-2021-p2'
-      }
-    };
+const USERS_KEY = 'pastq_users';
+const CURRENT_USER_KEY = 'pastq_current_user';
 
-    // Persist only after validation succeeds, then return the same profile to the caller for session state.
-    existingUsers.push(newUser);
-    localStorage.setItem('pastq_registered_users', JSON.stringify(existingUsers));
-    
-    return { success: true, user: newUser };
-  } catch (err) {
-    return { success: false, message: 'Failed to save registration data.' };
+// Get all registered users from local storage
+export const getUsers = () => {
+  const users = localStorage.getItem(USERS_KEY);
+  return users ? JSON.parse(users) : [];
+};
+
+// Register a new user
+export const registerUser = (userData) => {
+  const users = getUsers();
+
+  // Check if email already exists
+  const existingUser = users.find(
+    (u) => u.email.toLowerCase() === userData.email.toLowerCase()
+  );
+
+  if (existingUser) {
+    return { success: false, message: 'An account with this email already exists.' };
   }
-}
 
-// Login searches the locally stored accounts and returns a uniform success/failure result for the UI.
-export function loginUser(email, password) {
-  // The prototype compares the plaintext password directly; this is intentionally documented as non-production.
-  const existingUsers = JSON.parse(localStorage.getItem('pastq_registered_users') || '[]');
-  const user = existingUsers.find(
-    u => u.email.toLowerCase() === email.toLowerCase() && u.password === password
+  const newUser = {
+    id: Date.now().toString(),
+    createdAt: new Date().toISOString(),
+    ...userData,
+  };
+
+  users.push(newUser);
+  localStorage.setItem(USERS_KEY, JSON.stringify(users));
+  
+  // Automatically log in the user after registration
+  setCurrentUser(newUser);
+
+  return { success: true, user: newUser };
+};
+
+// Log in an existing user
+export const loginUser = (email, password) => {
+  const users = getUsers();
+  const user = users.find(
+    (u) => u.email.toLowerCase() === email.toLowerCase() && u.password === password
   );
 
   if (!user) {
     return { success: false, message: 'Invalid email or password.' };
   }
 
+  setCurrentUser(user);
   return { success: true, user };
-}
+};
+
+// Set active user session
+export const setCurrentUser = (user) => {
+  localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
+};
+
+// Get active user session
+export const getCurrentUser = () => {
+  const user = localStorage.getItem(CURRENT_USER_KEY);
+  return user ? JSON.parse(user) : null;
+};
+
+// Log out user
+export const logoutUser = () => {
+  localStorage.removeItem(CURRENT_USER_KEY);
+};

@@ -1,4 +1,7 @@
 import React from 'react';
+// Route-level practice-exam catalogue; the actual timed interaction belongs to ExamRunner.jsx.
+// Modify the displayed exam records and start callback here.
+import React from 'react';
 import { ArrowLeft, FileText, Clock, AlertCircle, Play } from 'lucide-react';
 
 export default function PracticeExam({ isDarkMode = false, onBack, onStartExam }) {

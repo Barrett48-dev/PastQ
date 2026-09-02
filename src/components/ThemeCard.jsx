@@ -1,5 +1,8 @@
 // Theme option card with a small visual preview of the selected appearance.
 import React from 'react';
+// Selectable visual/theme card used by onboarding.
+// Modify its presentation here; the parent owns the selected value and persistence.
+import React from 'react';
 import { Sun, Moon, Check } from 'lucide-react';
 
 export const ThemeCard = ({ type = 'dark', selected, onClick }) => {

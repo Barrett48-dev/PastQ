@@ -81,3 +81,69 @@ npm run preview  # Serve the production build locally
 ## Extending the Project
 
 For a production version, replace `src/utils/auth.js` with an API-backed authentication service, move paper metadata and answer keys to a protected backend, add a real PDF asset or document service, persist attempts and mastery, and connect dashboard subject actions to `SubjectSearch` or a route-based navigation layer.
+
+## File-by-File Maintenance Guide
+
+This section is the detailed map for modifying the current repository. Make changes in the file that owns the behavior, then run `npm run lint` and `npm run build`. The application is intentionally prototype-sized, so many data sets live beside the component that renders them. When a data set becomes shared or remote, extract it into a service/module rather than duplicating it across screens.
+
+### Root Files
+
+- `.gitignore` keeps logs, editor state, dependency folders, build output, and local environment files out of Git. Modify it only when introducing a new generated or machine-specific artifact; never use it to hide source files that should be reviewed.
+- `package.json` defines the project identity, dependency versions, and the `dev`, `build`, `lint`, and `preview` commands. Add a runtime library under `dependencies`, a build/lint tool under `devDependencies`, and a repeatable command under `scripts`; run `npm install` so `package-lock.json` changes with it.
+- `package-lock.json` locks the exact dependency tree selected by npm. Do not hand-edit it. Change `package.json`, then run `npm install` from the project root and commit the resulting lockfile update.
+- `index.html` is Vite's single HTML shell. Change the document title, favicon, language, metadata, or root element here. Keep `<div id="root">` and the module script intact unless changing the React bootstrap architecture.
+- `vite.config.js` wires React's Vite transform and Tailwind's Vite plugin. Add aliases, proxy rules, build options, or additional plugins in the exported `plugins`/config object; changes here affect development and production builds.
+- `eslint.config.js` is the flat ESLint configuration. Change ignored paths, browser globals, or project-wide lint rules here. Prefer fixing source code over disabling a rule; a rule exception should be narrowly scoped to a file pattern.
+- `README.md` is the source of truth for setup, architecture, limitations, and this maintenance map. Update it when a route, storage contract, dependency, or workflow changes.
+
+### Application Entry And Shell
+
+- `src/main.jsx` is the browser entry point. It imports global CSS and mounts `<App />` into `#root` under `StrictMode`. Change this file when adding providers, global error boundaries, or a different root setup; do not put page-specific state here.
+- `src/App.jsx` owns the top-level session/theme state and the app's view switching. It also contains several route-level prototype screens and the navigation callbacks passed to child views. Modify the `view`/navigation logic when adding a dashboard destination; modify the local page function and its data when changing that page's UI. For a production router, this is the main extraction point.
+- `src/Auth.jsx` is the full-screen returning-user login form. Its local state owns email, password visibility, loading, validation feedback, and Remember Me UI; `loginUser` owns credential lookup, while `onLoginSuccess` hands the profile back to `App`. Change form fields and validation inside `handleLogin` and the form markup; change authentication behavior in `src/utils/auth.js`.
+- `src/Dashboard.jsx` renders the authenticated home screen. `quickActions` is the exact list of dashboard destinations, the level buttons pass navigation payloads, and `PracticalLabs` renders the lab entry point. Add or rename dashboard actions in `quickActions` and update the parent navigation handler in `App.jsx` for new IDs.
+- `src/ExamRunner.jsx` is a standalone timed multiple-choice runner. Its question array is the place to change demo questions, answer indexes, and explanations; its timer effect controls countdown/auto-submit; its results branch controls review. It is not currently connected to the main dashboard, so wire it from `App.jsx` before treating it as the primary exam path.
+- `src/FlashcardDeck.jsx` is the reusable standalone missed-question review experience. Change the question shape, card face content, or mastery actions here when the deck contract changes. The richer `SubjectSearch` flow has a local deck implementation; update both or extract a shared deck if their behavior must stay identical.
+- `src/PracticalLab.jsx` is the legacy tracked path for the practical-lab prototype and is currently deleted in the worktree. The active implementation is `src/components/PracticalLabs.jsx`; restore or remove references to this old file only as part of an intentional migration, not as a parallel implementation.
+- `src/SubjectSearch.jsx` is the legacy tracked path for the paper catalogue and is currently deleted in the worktree. The active implementation is `src/components/SubjectSearch.jsx`; keep imports aligned with the active path and remove stale references when completing the rename.
+
+### Reusable Components
+
+- `src/components/AuthModal.jsx` is the modal login/signup shell used by the newer auth flow. Change open/close behavior, modal layout, and mode-specific presentation here; keep credential persistence in `src/utils/auth.js` and pass results through the callbacks.
+- `src/components/AskAIPage.jsx` is the Smart AI conversation screen. Its local message state and simulated response delay define the prototype interaction. Replace the delayed mock with an API client here, then add loading, error, cancellation, and authentication handling at this boundary.
+- `src/components/Button.jsx` is the shared prop-driven button primitive. Add a visual variant in `variants`, or adjust common sizing in `baseStyles`; callers should provide content and `className` overrides rather than duplicating button geometry.
+- `src/components/ChipTag.jsx` renders a selectable tag with an optional active accent. Change selection visuals or supported `variant` values here; the parent remains responsible for the selected value and click behavior.
+- `src/components/InputField.jsx` is a controlled labeled input with optional leading icon and password visibility toggle. Change accessibility, input attributes, or password behavior here; change validation and stored values in the owning form.
+- `src/components/LoginModal.jsx` is the modal-specific login form. Its fields, error state, and login callback are local to the modal; update the form markup here and the storage contract in `auth.js`.
+- `src/components/MyProgress.jsx` displays the current fixed progress metrics and a back action. Replace the hard-coded metrics or connect an API in this component; pass real attempt data as props once progress is persisted.
+- `src/components/OnboardingWizard.jsx` owns the seven-step profile setup, step validation, subject/goal selection, and registration submission. Change step order/content in the step definitions and corresponding render branches; change profile persistence through `registerUser`, not by writing storage in the wizard.
+- `src/components/PastQuestionsPage.jsx` lists paper years and provides the current download/view action. Change the year range, paper metadata, or PDF action in this file. Replace the alert with a real download/view service here when backend paper URLs exist.
+- `src/components/PracticalLabs.jsx` is the active practical-lab navigation/experiment component. Change lab choices, editor behavior, console capture, or projectile calculation in its local state and handlers. `Dashboard.jsx` owns where the component is placed.
+- `src/components/PracticeExam.jsx` is the current route-level mock exam list. Change the displayed exam records and start controls here; keep actual timed answering in `ExamRunner.jsx` or a dedicated runner component.
+- `src/components/PracticeExamPage.jsx` is the newer practice-exam page wrapper. Modify its page-level layout and handoff to the runner here; do not duplicate question grading logic if the runner owns it.
+- `src/components/SavedQuestions.jsx` renders saved-paper placeholder records. Replace its static records with a saved-items prop or service, and keep save/remove mutations in the owning data layer once persistence is added.
+- `src/components/SelectionCard.jsx` is a selectable card used by onboarding choices. Change its selected/unselected visuals and icon/title layout here; selection state and the selected value belong to `OnboardingWizard`.
+- `src/components/SmartAI.jsx` is the dashboard-level Smart AI entry/placeholder view. Change its presentation or handoff to `AskAIPage.jsx` here; put message generation in the AI page/service rather than this launcher.
+- `src/components/StudyPlan.jsx` shows and mutates the prototype in-memory study task list. Change default tasks and completion behavior here; move the list to persisted/API-backed state when it must survive reloads.
+- `src/components/SubjectSearch.jsx` is the active catalogue, paper viewer, answer-sheet, timer, grading, and missed-question review flow. Change `papers` for demo catalogue records, answer keys for grading, filter logic for search behavior, and the submit/timer handlers for exam rules. This is the main integration point for real paper/document APIs.
+- `src/components/ThemeCard.jsx` renders a selectable theme/subject-style card. Change its icon, label, or selected appearance here; keep the selected theme value and persistence in the parent wizard.
+- `src/components/WizardHeader.jsx` renders onboarding progress and navigation context. Change step labels, progress display, or close/back controls here; step transitions remain in `OnboardingWizard`.
+
+### Styles And Assets
+
+- `src/index.css` imports Tailwind and defines global color tokens plus the body fallback. Change design tokens, global typography, reset rules, or app-wide base behavior here. Most component styling is Tailwind utility classes in JSX, so use this file for rules shared by many screens.
+- `src/App.css` is intentionally empty/reserved because current views use Tailwind utilities. Add selectors here only for behavior that is awkward or impossible to express with utilities; avoid creating a second competing design system.
+- `public/favicon.svg` is the browser tab icon. Replace the SVG or its colors/viewBox here when branding changes; keep the `index.html` reference synchronized.
+- `public/icons.svg` is the shared SVG symbol sprite. Add or edit `<symbol>` entries here when an icon must be available as a sprite; update the consuming `<use>` reference in the component that renders it.
+- `src/assets/hero.png` is a raster asset available to the bundle. Replace it when the product needs a new hero image, and update the importing component if its dimensions or crop assumptions change.
+- `src/assets/react.svg` and `src/assets/vite.svg` are starter/template assets. They are not part of the PastQ workflow; remove them when no longer referenced, or replace them only if a visible screen still uses them.
+
+### Browser Storage Contract
+
+- `src/utils/auth.js` is the single storage helper for demo accounts and the active user. `USERS_KEY` controls the registered-account list and `CURRENT_USER_KEY` controls the current session. Modify `getUsers`/`registerUser` for account schema changes, `loginUser` for credential rules, and `setCurrentUser`/`getCurrentUser`/`logoutUser` for session lifetime. The current code stores passwords as plain JSON and always uses `localStorage`; do not present this as production authentication. Any change to profile fields must be reflected in onboarding, login, `App.jsx`, and this README.
+
+### What Not To Edit
+
+- `dist/` is generated by `npm run build`; edit source files and rebuild instead.
+- `node_modules/` is installed dependency code; change versions through `package.json` and npm.
+- Binary assets such as `hero.png` cannot carry useful inline comments; document their purpose and replacement point in this README.

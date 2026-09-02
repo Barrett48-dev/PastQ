@@ -1,4 +1,7 @@
 import React from 'react';
+// Progress summary screen; its current metrics are presentation-only prototype data.
+// Replace the fixed records with props or a data service here when attempts become persistent.
+import React from 'react';
 import { ArrowLeft, TrendingUp, Target, Award, CheckCircle } from 'lucide-react';
 
 export default function MyProgress({ isDarkMode = false, onBack }) {

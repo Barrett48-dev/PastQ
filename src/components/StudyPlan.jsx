@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+// In-memory study timetable with task completion controls.
+// Modify default tasks and completion behavior here; move state to persistence when it must survive reloads.
+import React, { useState } from 'react';
 import { 
   ArrowLeft, Calendar, Plus, CheckCircle2, Circle, 
   Clock, BookOpen, Flame, Sparkles, Filter, Trash2

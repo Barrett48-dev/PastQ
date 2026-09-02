@@ -1,4 +1,6 @@
 // Standalone review modal that turns missed questions into a flip-and-rate study deck.
+// Standalone review modal that turns missed questions into a flip-and-rate study deck.
+// Modify the question-card rendering and rating handlers here; callers supply the missed-question records and close callback.
 import React, { useState } from 'react';
 import { ArrowLeft, RotateCw, CheckCircle2, RefreshCw, Sparkles, BookOpen } from 'lucide-react';
 

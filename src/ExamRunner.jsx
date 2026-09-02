@@ -1,4 +1,6 @@
 // Standalone timed multiple-choice demo with answer navigation and a results review screen.
+// Standalone timed multiple-choice demo with answer navigation and a results review screen.
+// Modify the question records for content, the timer effect for timing rules, and the results branch for review behavior.
 import React, { useState, useEffect } from 'react';
 import { Clock, CheckCircle2, AlertCircle, ArrowLeft, ArrowRight, RotateCcw, Send, Check, X } from 'lucide-react';
 

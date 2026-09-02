@@ -1,4 +1,7 @@
 import React from 'react';
+// Saved-paper presentation using prototype records.
+// Replace local placeholder data with props or a persistence service when save/remove actions are implemented.
+import React from 'react';
 import { ArrowLeft, Bookmark, Award, Star } from 'lucide-react';
 
 export function SavedQuestions({ isDarkMode = false, onBack }) {

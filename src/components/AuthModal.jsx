@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+// Modal authentication surface for login and signup modes; storage and credential rules remain in utils/auth.js.
+// Modify mode-specific fields and callbacks here, then keep App.jsx responsible for session-level state.
+import React, { useState } from 'react';
 import { X, Mail, Lock, User } from 'lucide-react';
 import { loginUser } from '../utils/auth';
 

@@ -1,1 +1,3 @@
 /* Reserved for future app-level selectors; current views intentionally use Tailwind utilities from index.css. */
+/* App-level CSS escape hatch; current views intentionally use Tailwind utilities from index.css. */
+/* Add shared selectors here only when utility classes cannot express the behavior, and keep tokens in index.css. */
