@@ -1,11 +1,11 @@
+// Saved-content route module: the first export is the saved-questions page and the second is the achievements page.
+// Modify the JSX for layout changes; replace placeholder records with props or a persistence service when those features are built.
 import React from 'react';
-// Saved-paper presentation using prototype records.
-// Replace local placeholder data with props or a persistence service when save/remove actions are implemented.
-import React from 'react';
-import { ArrowLeft, Bookmark, Award, Star } from 'lucide-react';
+import { ArrowLeft, Bookmark, Award } from 'lucide-react';
 
-export function SavedQuestions({ isDarkMode = false, onBack }) {
-  // Saved-question persistence is not implemented yet, so this route documents the intended empty state.
+export function SavedQuestionsPage({ isDarkMode = false, onBack }) {
+  // The current release intentionally renders an empty state because no save/remove storage contract exists yet.
+  // Add the saved-question collection to the component props, then map records inside <main> while preserving onBack.
   return (
     <div className={`min-h-screen font-sans ${isDarkMode ? 'bg-[#0B0C0E] text-white' : 'bg-[#F8FAFC] text-slate-800'}`}>
       {/* Header keeps the placeholder consistent with the other dashboard destinations. */}

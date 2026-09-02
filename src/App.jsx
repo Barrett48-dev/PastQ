@@ -1,4 +1,3 @@
-// src/App.jsx
 // Application shell: restores the session, owns theme/view state, and renders route-level prototype pages.
 // Modify navigation IDs and page handlers here when adding dashboard destinations; page-specific UI stays in its owning component.
 import React, { useState, useEffect } from 'react';
@@ -6,10 +5,12 @@ import {
   BookOpen, Sparkles, Play, Flame, CheckCircle2, 
   BarChart2, ChevronRight, FileText, Target, Award, LogOut,
   Sun, Moon, FlaskConical, Bot, Cpu, Atom, Calculator, MessageSquare, X, Code, 
-  ArrowLeft, Download, Filter, HelpCircle, TrendingUp, Clock, AlertTriangle, RefreshCw
+  ArrowLeft, Download, Filter, HelpCircle, TrendingUp, Clock, AlertTriangle, RefreshCw, Bookmark
 } from 'lucide-react';
 import OnboardingWizard from './components/OnboardingWizard';
 import LoginModal from './components/LoginModal';
+// The saved page is imported here because `activeTab` is owned by this shell; its content remains in the component module.
+import { SavedQuestionsPage } from './components/SavedQuestions';
 import { getCurrentUser, logoutUser } from './utils/auth';
 
 // --- PAST QUESTIONS PAGE COMPONENT ---
@@ -741,6 +742,8 @@ export default function App() {
                 { id: 'overview', label: 'Dashboard' },
                 { id: 'papers', label: 'Past Papers' },
                 { id: 'drills', label: 'Topic Drills' },
+                // Keep this ID synchronized with the conditional renderer below and with Dashboard's quick-action ID.
+                { id: 'saved', label: 'Saved Questions' },
                 { id: 'analytics', label: 'Analytics' }
               ].map((tab) => (
                 <button
@@ -807,6 +810,18 @@ export default function App() {
         {activeTab === 'drills' && (
           <TopicDrillsPage
             selectedSubject={selectedSubject}
+            isDarkMode={isDarkMode}
+            onBack={() => setActiveTab('overview')}
+            onAskAi={(prompt) => {
+              setAiPromptInput(prompt);
+              setIsAiAssistantOpen(true);
+            }}
+          />
+        )}
+
+        {/* This tab currently presents the saved-content empty state; persistence should be added behind SavedQuestionsPage. */}
+        {activeTab === 'saved' && (
+          <SavedQuestionsPage
             isDarkMode={isDarkMode}
             onBack={() => setActiveTab('overview')}
             onAskAi={(prompt) => {
