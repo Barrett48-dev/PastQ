@@ -1,8 +1,6 @@
-// Onboarding heading that pairs step context with a progress indicator.
-import React from 'react';
 // Onboarding progress and navigation context header.
-// Modify labels and progress visuals here; step transitions remain in OnboardingWizard.jsx.
 import React from 'react';
+// Modify labels and progress visuals here; step transitions remain in OnboardingWizard.jsx.
 
 export const WizardHeader = ({ tagText, title, subtitle, totalSteps = 3, currentStep = 1 }) => {
 // Progress segments are generated from the configured total so the header works for differently sized wizards.

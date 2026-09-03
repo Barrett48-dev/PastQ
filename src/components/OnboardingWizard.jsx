@@ -1,5 +1,4 @@
 // Seven-step profile setup that collects the information used to personalize the dashboard.
-// Seven-step profile setup that collects the information used to personalize the dashboard.
 // Modify step definitions and validation here; submit profile persistence through utils/auth.js.
 import React, { useState } from 'react';
 import { 

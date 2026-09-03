@@ -1,25 +1,23 @@
-// Application shell: restores the session, owns theme/view state, and renders route-level prototype pages.
-// Modify navigation IDs and page handlers here when adding dashboard destinations; page-specific UI stays in its owning component.
+// Application shell and the authenticated dashboard's inline page views.
 import React, { useState, useEffect } from 'react';
 import { 
   BookOpen, Sparkles, Play, Flame, CheckCircle2, 
   BarChart2, ChevronRight, FileText, Target, Award, LogOut,
   Sun, Moon, FlaskConical, Bot, Cpu, Atom, Calculator, MessageSquare, X, Code, 
-  ArrowLeft, Download, Filter, HelpCircle, TrendingUp, Clock, AlertTriangle, RefreshCw, Bookmark
+  ArrowLeft, Download, Filter, HelpCircle, TrendingUp, Clock, AlertTriangle, RefreshCw, Bookmark, Menu
 } from 'lucide-react';
 import OnboardingWizard from './components/OnboardingWizard';
 import LoginModal from './components/LoginModal';
-// The saved page is imported here because `activeTab` is owned by this shell; its content remains in the component module.
 import { SavedQuestionsPage } from './components/SavedQuestions';
 import { getCurrentUser, logoutUser } from './utils/auth';
 
-// --- PAST QUESTIONS PAGE COMPONENT ---
+// Past-paper archive view with the current placeholder download action.
 
 function PastQuestionsPage({ level = 'O-Level', subject = 'General', isDarkMode, onBack }) {
   const years = Array.from({ length: 11 }, (_, i) => 2026 - i);
 
   return (
-    <div className={`min-h-screen p-6 max-w-5xl mx-auto animate-in fade-in duration-200 ${isDarkMode ? 'bg-[#0B0C0E] text-white' : 'bg-slate-50 text-slate-900'}`}>
+    <div className={`min-h-screen p-4 sm:p-6 max-w-5xl mx-auto animate-in fade-in duration-200 ${isDarkMode ? 'bg-[#0B0C0E] text-white' : 'bg-slate-50 text-slate-900'}`}>
       <button onClick={onBack} className="flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-indigo-500 mb-6 cursor-pointer">
         <ArrowLeft size={16} /> Back to Dashboard
       </button>
@@ -64,7 +62,7 @@ function PastQuestionsPage({ level = 'O-Level', subject = 'General', isDarkMode,
   );
 }
 
-// --- TOPIC DRILLS PAGE COMPONENT ---
+// Interactive subject drills with local sample questions and explanations.
 
 function TopicDrillsPage({ selectedSubject, isDarkMode, onBack, onAskAi }) {
   const [activeCategory, setActiveCategory] = useState(selectedSubject || 'All');
@@ -122,7 +120,7 @@ function TopicDrillsPage({ selectedSubject, isDarkMode, onBack, onAskAi }) {
   const currentDrill = selectedTopic || filteredDrills[0];
 
   return (
-    <div className={`min-h-screen p-6 max-w-5xl mx-auto animate-in fade-in duration-200 ${isDarkMode ? 'bg-[#0B0C0E] text-white' : 'bg-slate-50 text-slate-900'}`}>
+    <div className={`min-h-screen p-4 sm:p-6 max-w-5xl mx-auto animate-in fade-in duration-200 ${isDarkMode ? 'bg-[#0B0C0E] text-white' : 'bg-slate-50 text-slate-900'}`}>
       <button onClick={onBack} className="flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-indigo-500 mb-6 cursor-pointer">
         <ArrowLeft size={16} /> Back to Dashboard
       </button>
@@ -268,7 +266,7 @@ function TopicDrillsPage({ selectedSubject, isDarkMode, onBack, onAskAi }) {
   );
 }
 
-// --- ANALYTICS PAGE COMPONENT ---
+// Analytics view for the current prototype metrics.
 
 function AnalyticsPage({ isDarkMode, onBack }) {
   const stats = [
@@ -286,7 +284,7 @@ function AnalyticsPage({ isDarkMode, onBack }) {
   ];
 
   return (
-    <div className={`min-h-screen p-6 max-w-5xl mx-auto animate-in fade-in duration-200 ${isDarkMode ? 'bg-[#0B0C0E] text-white' : 'bg-slate-50 text-slate-900'}`}>
+    <div className={`min-h-screen p-4 sm:p-6 max-w-5xl mx-auto animate-in fade-in duration-200 ${isDarkMode ? 'bg-[#0B0C0E] text-white' : 'bg-slate-50 text-slate-900'}`}>
       <button onClick={onBack} className="flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-indigo-500 mb-6 cursor-pointer">
         <ArrowLeft size={16} /> Back to Dashboard
       </button>
@@ -375,72 +373,90 @@ function AnalyticsPage({ isDarkMode, onBack }) {
   );
 }
 
-// --- PRACTICAL LAB SUB-COMPONENTS ---
+// Full-page practical lab views selected from the navigation menu.
 
-function ChemistryLab({ isDarkMode }) {
+function ChemistryLabPage({ isDarkMode, onBack }) {
   const [addedMl, setAddedMl] = useState(0);
   const ph = Math.min(14, Math.max(1, 1 + (addedMl / 25) * 6));
   const isEquivalence = addedMl >= 24.5 && addedMl <= 25.5;
 
-  const bgSubCard = isDarkMode ? 'bg-[#1A1B20] border-[#26272E]' : 'bg-slate-50 border-slate-200';
-  const textSub = isDarkMode ? 'text-[#A1A1AA]' : 'text-slate-500';
-  const textMain = isDarkMode ? 'text-white' : 'text-slate-800';
+  const cardBg = isDarkMode ? 'bg-[#141519] border-[#26272E]' : 'bg-white border-slate-200 shadow-sm';
 
   return (
-    <div className="space-y-4">
-      <div className={`flex items-center justify-between border-b pb-3 ${isDarkMode ? 'border-[#26272E]' : 'border-slate-200'}`}>
-        <span className="text-xs font-bold text-pink-500 flex items-center space-x-2">
-          <FlaskConical size={16} />
-          <span>Acid-Base Titration Lab</span>
-        </span>
-        <span className={`text-xs font-mono ${textSub}`}>0.1M HCl vs 0.1M NaOH</span>
+    <div className={`min-h-screen p-4 sm:p-6 max-w-5xl mx-auto animate-in fade-in duration-200 ${isDarkMode ? 'bg-[#0B0C0E] text-white' : 'bg-slate-50 text-slate-900'}`}>
+      <button onClick={onBack} className="flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-indigo-500 mb-6 cursor-pointer">
+        <ArrowLeft size={16} /> Back to Dashboard
+      </button>
+
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <span className="text-xs font-extrabold uppercase px-2.5 py-1 bg-pink-500/10 text-pink-500 rounded-md">
+            Interactive Practical Lab
+          </span>
+          <h2 className="text-2xl font-black mt-2 flex items-center gap-2">
+            <FlaskConical className="text-pink-500" /> Chemistry Titration Lab
+          </h2>
+          <p className="text-xs text-slate-400">Simulate Acid-Base titration (0.1M HCl vs 0.1M NaOH) with real-time pH tracking.</p>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className={`space-y-3 p-4 rounded-xl border ${bgSubCard}`}>
-          <div className="flex justify-between text-xs">
-            <span className={textSub}>Burette Volume Added:</span>
-            <span className={`font-bold font-mono ${textMain}`}>{addedMl.toFixed(1)} mL</span>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className={`p-6 rounded-3xl border space-y-6 ${cardBg}`}>
+          <h3 className="text-sm font-bold">Burette Volume Controls</h3>
+          
+          <div className="space-y-2">
+            <div className="flex justify-between text-xs font-semibold">
+              <span>Added NaOH Volume:</span>
+              <span className="font-mono text-pink-500 text-sm">{addedMl.toFixed(1)} mL</span>
+            </div>
+            <input 
+              type="range" min="0" max="50" step="0.5" 
+              value={addedMl} 
+              onChange={(e) => setAddedMl(parseFloat(e.target.value))}
+              className="w-full accent-pink-500 cursor-pointer h-2 bg-slate-200 rounded-lg" 
+            />
           </div>
-          <input 
-            type="range" min="0" max="50" step="0.5" 
-            value={addedMl} 
-            onChange={(e) => setAddedMl(parseFloat(e.target.value))}
-            className="w-full accent-indigo-600 cursor-pointer" 
-          />
-          <div className="flex space-x-2 pt-2">
+
+          <div className="flex gap-3">
             <button 
               onClick={() => setAddedMl((v) => Math.min(50, v + 1))} 
-              className={`flex-1 py-1.5 text-xs rounded-lg cursor-pointer transition-colors ${
-                isDarkMode ? 'bg-[#26272E] hover:bg-[#3F404A] text-white' : 'bg-slate-200 hover:bg-slate-300 text-slate-700'
-              }`}
+              className="flex-1 py-2 text-xs font-bold rounded-xl bg-pink-500/10 hover:bg-pink-500/20 text-pink-500 transition-colors cursor-pointer"
             >
-              +1.0 mL
+              + 1.0 mL
             </button>
-            <button onClick={() => setAddedMl(0)} className="py-1.5 px-3 bg-red-500/20 text-red-500 text-xs rounded-lg cursor-pointer font-semibold">
+            <button 
+              onClick={() => setAddedMl((v) => Math.min(50, v + 5))} 
+              className="flex-1 py-2 text-xs font-bold rounded-xl bg-pink-500/10 hover:bg-pink-500/20 text-pink-500 transition-colors cursor-pointer"
+            >
+              + 5.0 mL
+            </button>
+            <button 
+              onClick={() => setAddedMl(0)} 
+              className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-500 text-xs rounded-xl font-bold transition-colors cursor-pointer"
+            >
               Reset
             </button>
           </div>
         </div>
 
-        <div className={`p-4 rounded-xl border flex flex-col justify-center space-y-3 text-center ${bgSubCard}`}>
-          <div className="flex justify-around text-xs">
-            <div>
-              <p className={textSub}>Current pH</p>
-              <p className={`text-xl font-bold font-mono ${ph > 8 ? 'text-pink-500' : 'text-blue-500'}`}>
-                {ph.toFixed(2)}
-              </p>
-            </div>
-            <div>
-              <p className={textSub}>Flask Color</p>
-              <div 
-                className="w-6 h-6 rounded-full mx-auto mt-1 border border-slate-400/40 transition-colors duration-300"
-                style={{ backgroundColor: ph > 8.2 ? '#EC4899' : 'transparent' }}
-              />
-            </div>
+        <div className={`p-6 rounded-3xl border flex flex-col justify-center items-center text-center space-y-6 ${cardBg}`}>
+          <div className="space-y-2">
+            <p className="text-xs text-slate-400 uppercase font-bold">Current Solution pH</p>
+            <p className={`text-4xl font-black font-mono ${ph > 8 ? 'text-pink-500' : 'text-blue-500'}`}>
+              {ph.toFixed(2)}
+            </p>
           </div>
+
+          <div className="space-y-2">
+            <p className="text-xs text-slate-400 uppercase font-bold">Indicator Color</p>
+            <div 
+              className="w-16 h-16 rounded-full mx-auto border-2 border-slate-400/40 transition-colors duration-300 shadow-inner"
+              style={{ backgroundColor: ph > 8.2 ? '#EC4899' : 'transparent' }}
+            />
+          </div>
+
           {isEquivalence && (
-            <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-500/10 py-1 rounded-lg border border-emerald-500/20">
+            <p className="text-xs text-emerald-500 font-bold bg-emerald-500/10 px-4 py-2 rounded-xl border border-emerald-500/20 animate-pulse">
               Equivalence Point Reached (~25.0 mL)
             </p>
           )}
@@ -450,49 +466,54 @@ function ChemistryLab({ isDarkMode }) {
   );
 }
 
-function PhysicsCircuit({ isDarkMode }) {
+function PhysicsLabPage({ isDarkMode, onBack }) {
   const [voltage, setVoltage] = useState(12);
   const [resistance, setResistance] = useState(10);
   const current = (voltage / resistance).toFixed(2);
+  const power = (voltage * current).toFixed(1);
 
-  const bgSubCard = isDarkMode ? 'bg-[#1A1B20] border-[#26272E]' : 'bg-slate-50 border-slate-200';
-  const textSub = isDarkMode ? 'text-[#A1A1AA]' : 'text-slate-500';
-  const textMain = isDarkMode ? 'text-white' : 'text-slate-800';
+  const cardBg = isDarkMode ? 'bg-[#141519] border-[#26272E]' : 'bg-white border-slate-200 shadow-sm';
 
   return (
-    <div className="space-y-4">
-      <div className={`flex items-center justify-between border-b pb-3 ${isDarkMode ? 'border-[#26272E]' : 'border-slate-200'}`}>
-        <span className="text-xs font-bold text-cyan-500 flex items-center space-x-2">
-          <Atom size={16} />
-          <span>DC Circuit Simulator (Ohm's Law)</span>
+    <div className={`min-h-screen p-4 sm:p-6 max-w-5xl mx-auto animate-in fade-in duration-200 ${isDarkMode ? 'bg-[#0B0C0E] text-white' : 'bg-slate-50 text-slate-900'}`}>
+      <button onClick={onBack} className="flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-indigo-500 mb-6 cursor-pointer">
+        <ArrowLeft size={16} /> Back to Dashboard
+      </button>
+
+      <div className="mb-6">
+        <span className="text-xs font-extrabold uppercase px-2.5 py-1 bg-cyan-500/10 text-cyan-500 rounded-md">
+          Interactive Practical Lab
         </span>
-        <span className={`text-xs font-mono ${textSub}`}>I = V / R</span>
+        <h2 className="text-2xl font-black mt-2 flex items-center gap-2">
+          <Atom className="text-cyan-500" /> DC Circuit Simulator (Ohm's Law)
+        </h2>
+        <p className="text-xs text-slate-400">Adjust circuit voltage and resistance to observe electrical current and power draw.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className={`space-y-4 p-4 rounded-xl border ${bgSubCard}`}>
-          <div>
-            <div className="flex justify-between text-xs mb-1">
-              <span className={textSub}>Voltage (V):</span>
-              <span className={`font-bold font-mono ${textMain}`}>{voltage} V</span>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className={`p-6 rounded-3xl border space-y-6 ${cardBg}`}>
+          <div className="space-y-2">
+            <div className="flex justify-between text-xs font-semibold">
+              <span>Voltage (V):</span>
+              <span className="font-mono text-cyan-500 text-sm">{voltage} V</span>
             </div>
-            <input type="range" min="1" max="24" value={voltage} onChange={(e) => setVoltage(Number(e.target.value))} className="w-full accent-indigo-600 cursor-pointer" />
+            <input type="range" min="1" max="24" value={voltage} onChange={(e) => setVoltage(Number(e.target.value))} className="w-full accent-cyan-500 cursor-pointer h-2 bg-slate-200 rounded-lg" />
           </div>
 
-          <div>
-            <div className="flex justify-between text-xs mb-1">
-              <span className={textSub}>Resistance (R):</span>
-              <span className={`font-bold font-mono ${textMain}`}>{resistance} Ω</span>
+          <div className="space-y-2">
+            <div className="flex justify-between text-xs font-semibold">
+              <span>Resistance (R):</span>
+              <span className="font-mono text-cyan-500 text-sm">{resistance} Ω</span>
             </div>
-            <input type="range" min="1" max="100" value={resistance} onChange={(e) => setResistance(Number(e.target.value))} className="w-full accent-indigo-600 cursor-pointer" />
+            <input type="range" min="1" max="100" value={resistance} onChange={(e) => setResistance(Number(e.target.value))} className="w-full accent-cyan-500 cursor-pointer h-2 bg-slate-200 rounded-lg" />
           </div>
         </div>
 
-        <div className={`p-4 rounded-xl border flex flex-col justify-center items-center text-center space-y-2 ${bgSubCard}`}>
-          <span className={`text-xs ${textSub}`}>Calculated Circuit Current</span>
-          <span className="text-3xl font-black font-mono text-cyan-500">{current} A</span>
-          <p className={`text-[10px] ${textSub} pt-1`}>
-            Power Dissipation: <strong className={textMain}>{(voltage * current).toFixed(1)} W</strong>
+        <div className={`p-6 rounded-3xl border flex flex-col justify-center items-center text-center space-y-4 ${cardBg}`}>
+          <span className="text-xs text-slate-400 font-bold uppercase">Calculated Current (I = V / R)</span>
+          <span className="text-5xl font-black font-mono text-cyan-500">{current} A</span>
+          <p className="text-xs text-slate-400 pt-2">
+            Power Dissipation (P = V × I): <strong className={isDarkMode ? 'text-white' : 'text-slate-800'}>{power} W</strong>
           </p>
         </div>
       </div>
@@ -500,165 +521,122 @@ function PhysicsCircuit({ isDarkMode }) {
   );
 }
 
-function ComputerSciencePlayground({ isDarkMode }) {
-  const [code, setCode] = useState("def binary_search(arr, target):\n    # Interactive sandbox\n    return 'Target found'");
+function CsLabPage({ isDarkMode, onBack }) {
+  const [code, setCode] = useState("def binary_search(arr, target):\n    low, high = 0, len(arr) - 1\n    while low <= high:\n        mid = (low + high) // 2\n        if arr[mid] == target:\n            return mid\n    return -1\n\nprint(binary_search([1, 3, 5, 7, 9], 7))");
   const [output, setOutput] = useState("");
 
   const runCode = () => {
-    setOutput("Executing Process...\n>>> Target found\n>>> Memory used: 12.4 MB\n>>> Time: 0.002s");
+    setOutput("Executing Python script...\n>>> Target found at index 3\n>>> Memory used: 12.4 MB\n>>> Execution time: 0.002s");
   };
 
+  const cardBg = isDarkMode ? 'bg-[#141519] border-[#26272E]' : 'bg-white border-slate-200 shadow-sm';
+
   return (
-    <div className="space-y-4">
-      <div className={`flex items-center justify-between border-b pb-3 ${isDarkMode ? 'border-[#26272E]' : 'border-slate-200'}`}>
-        <span className="text-xs font-bold text-emerald-500 flex items-center space-x-2">
-          <Code size={16} />
-          <span>Interactive Code Sandbox</span>
-        </span>
-        <button onClick={runCode} className="flex items-center space-x-1.5 px-3 py-1 bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/30 text-xs font-bold rounded-lg border border-emerald-500/30 cursor-pointer">
-          <Play size={12} />
-          <span>Run Code</span>
+    <div className={`min-h-screen p-4 sm:p-6 max-w-5xl mx-auto animate-in fade-in duration-200 ${isDarkMode ? 'bg-[#0B0C0E] text-white' : 'bg-slate-50 text-slate-900'}`}>
+      <button onClick={onBack} className="flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-indigo-500 mb-6 cursor-pointer">
+        <ArrowLeft size={16} /> Back to Dashboard
+      </button>
+
+      <div className="mb-6 flex justify-between items-center">
+        <div>
+          <span className="text-xs font-extrabold uppercase px-2.5 py-1 bg-emerald-500/10 text-emerald-500 rounded-md">
+            Interactive Practical Lab
+          </span>
+          <h2 className="text-2xl font-black mt-2 flex items-center gap-2">
+            <Code className="text-emerald-500" /> CS Algorithm Sandbox
+          </h2>
+          <p className="text-xs text-slate-400">Test algorithm logic, review code structures, and run simulations.</p>
+        </div>
+
+        <button onClick={runCode} className="flex items-center space-x-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold rounded-xl transition-all cursor-pointer shadow-md">
+          <Play size={14} />
+          <span>Execute Code</span>
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <textarea 
-          value={code} 
-          onChange={(e) => setCode(e.target.value)} 
-          rows={5} 
-          className={`w-full p-3 border rounded-xl text-xs font-mono focus:outline-none focus:border-emerald-500 resize-none ${
-            isDarkMode ? 'bg-[#1A1B20] border-[#26272E] text-emerald-300' : 'bg-slate-50 border-slate-200 text-slate-800'
-          }`} 
-        />
-        <div className={`border p-3 rounded-xl font-mono text-xs whitespace-pre-line ${
-          isDarkMode ? 'bg-black/40 border-[#26272E] text-slate-400' : 'bg-slate-100 border-slate-200 text-slate-600'
-        }`}>
-          {output || "Console Output will appear here..."}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className={`p-4 rounded-3xl border ${cardBg}`}>
+          <h3 className="text-xs font-bold mb-2 text-slate-400 uppercase">Code Editor</h3>
+          <textarea 
+            value={code} 
+            onChange={(e) => setCode(e.target.value)} 
+            rows={10} 
+            className={`w-full p-4 border rounded-2xl text-xs font-mono focus:outline-none focus:border-emerald-500 resize-none ${
+              isDarkMode ? 'bg-[#1A1B20] border-[#26272E] text-emerald-300' : 'bg-slate-50 border-slate-200 text-slate-800'
+            }`} 
+          />
+        </div>
+
+        <div className={`p-4 rounded-3xl border ${cardBg}`}>
+          <h3 className="text-xs font-bold mb-2 text-slate-400 uppercase">Console Output</h3>
+          <div className={`p-4 border rounded-2xl font-mono text-xs whitespace-pre-line min-h-[220px] ${
+            isDarkMode ? 'bg-black/50 border-[#26272E] text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-700'
+          }`}>
+            {output || "Click 'Execute Code' to run script output..."}
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-function MathPlotter({ isDarkMode }) {
+function MathLabPage({ isDarkMode, onBack }) {
   const [a, setA] = useState(1);
   const [b, setB] = useState(0);
 
-  const bgSubCard = isDarkMode ? 'bg-[#1A1B20] border-[#26272E]' : 'bg-slate-50 border-slate-200';
-  const textSub = isDarkMode ? 'text-[#A1A1AA]' : 'text-slate-500';
-  const textMain = isDarkMode ? 'text-white' : 'text-slate-800';
+  const cardBg = isDarkMode ? 'bg-[#141519] border-[#26272E]' : 'bg-white border-slate-200 shadow-sm';
 
   return (
-    <div className="space-y-4">
-      <div className={`flex items-center justify-between border-b pb-3 ${isDarkMode ? 'border-[#26272E]' : 'border-slate-200'}`}>
-        <span className="text-xs font-bold text-purple-500 flex items-center space-x-2">
-          <Calculator size={16} />
-          <span>Quadratic Function Visualizer</span>
+    <div className={`min-h-screen p-4 sm:p-6 max-w-5xl mx-auto animate-in fade-in duration-200 ${isDarkMode ? 'bg-[#0B0C0E] text-white' : 'bg-slate-50 text-slate-900'}`}>
+      <button onClick={onBack} className="flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-indigo-500 mb-6 cursor-pointer">
+        <ArrowLeft size={16} /> Back to Dashboard
+      </button>
+
+      <div className="mb-6">
+        <span className="text-xs font-extrabold uppercase px-2.5 py-1 bg-purple-500/10 text-purple-400 rounded-md">
+          Interactive Practical Lab
         </span>
-        <span className={`text-xs font-mono ${textSub}`}>y = {a}x² {b >= 0 ? `+ ${b}` : b}x</span>
+        <h2 className="text-2xl font-black mt-2 flex items-center gap-2">
+          <Calculator className="text-purple-500" /> Quadratic Function Visualizer
+        </h2>
+        <p className="text-xs text-slate-400">Explore polynomial curves by modifying equation coefficients in y = ax² + bx.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className={`space-y-4 p-4 rounded-xl border ${bgSubCard}`}>
-          <div>
-            <div className="flex justify-between text-xs mb-1">
-              <span className={textSub}>Coefficient (a):</span>
-              <span className={`font-bold font-mono ${textMain}`}>{a}</span>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className={`p-6 rounded-3xl border space-y-6 ${cardBg}`}>
+          <div className="space-y-2">
+            <div className="flex justify-between text-xs font-semibold">
+              <span>Coefficient (a):</span>
+              <span className="font-mono text-purple-500 text-sm">{a}</span>
             </div>
-            <input type="range" min="-5" max="5" value={a} onChange={(e) => setA(Number(e.target.value))} className="w-full accent-indigo-600 cursor-pointer" />
+            <input type="range" min="-5" max="5" value={a} onChange={(e) => setA(Number(e.target.value))} className="w-full accent-purple-500 cursor-pointer h-2 bg-slate-200 rounded-lg" />
           </div>
 
-          <div>
-            <div className="flex justify-between text-xs mb-1">
-              <span className={textSub}>Linear Term (b):</span>
-              <span className={`font-bold font-mono ${textMain}`}>{b}</span>
+          <div className="space-y-2">
+            <div className="flex justify-between text-xs font-semibold">
+              <span>Linear Term (b):</span>
+              <span className="font-mono text-purple-500 text-sm">{b}</span>
             </div>
-            <input type="range" min="-10" max="10" value={b} onChange={(e) => setB(Number(e.target.value))} className="w-full accent-indigo-600 cursor-pointer" />
+            <input type="range" min="-10" max="10" value={b} onChange={(e) => setB(Number(e.target.value))} className="w-full accent-purple-500 cursor-pointer h-2 bg-slate-200 rounded-lg" />
           </div>
         </div>
 
-        <div className={`p-4 rounded-xl border flex flex-col justify-center items-center text-center space-y-2 ${bgSubCard}`}>
-          <span className={`text-xs ${textSub}`}>Parabola Vertex Location</span>
-          <span className="text-xl font-bold font-mono text-purple-500">
+        <div className={`p-6 rounded-3xl border flex flex-col justify-center items-center text-center space-y-4 ${cardBg}`}>
+          <span className="text-xs text-slate-400 font-bold uppercase">Calculated Vertex Coordinates</span>
+          <span className="text-3xl font-black font-mono text-purple-500">
             ({(-b / (2 * (a || 1))).toFixed(2)}, {(-(b * b) / (4 * (a || 1))).toFixed(2)})
           </span>
-          <p className={`text-[10px] ${textSub}`}>
-            Curve direction: <strong className={textMain}>{a > 0 ? 'Upward (Min)' : a < 0 ? 'Downward (Max)' : 'Flat Line'}</strong>
+          <p className="text-xs text-slate-400 pt-2">
+            Parabola Direction: <strong className={isDarkMode ? 'text-white' : 'text-slate-800'}>{a > 0 ? 'Upward (Minimum)' : a < 0 ? 'Downward (Maximum)' : 'Linear Line'}</strong>
           </p>
         </div>
       </div>
     </div>
-  );
-}
-
-function PracticalLabs({ isDarkMode, activeTab, setActiveTab }) {
-  const tabs = [
-    { id: 'Chemistry', label: 'Chemistry Lab', icon: FlaskConical, color: 'text-pink-500' },
-    { id: 'Physics', label: 'Physics Circuit', icon: Atom, color: 'text-cyan-500' },
-    { id: 'Computer Science', label: 'CS Sandbox', icon: Code, color: 'text-emerald-500' },
-    { id: 'Mathematics', label: 'Math Visualizer', icon: Calculator, color: 'text-purple-500' },
-  ];
-
-  return (
-    <>
-      {activeTab && (
-        <div className="fixed inset-x-0 bottom-16 z-30 max-w-4xl mx-auto px-4 animate-in slide-in-from-bottom duration-200">
-          <div className={`p-5 rounded-2xl border shadow-2xl transition-colors ${
-            isDarkMode ? 'bg-[#141519] border-[#26272E] text-white' : 'bg-white border-slate-200 text-slate-800'
-          }`}>
-            <div className={`flex items-center justify-between pb-3 mb-4 border-b ${isDarkMode ? 'border-[#26272E]' : 'border-slate-200'}`}>
-              <span className={`text-xs font-bold uppercase tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                Practical Simulation Active
-              </span>
-              <button 
-                onClick={() => setActiveTab(null)}
-                className={`p-1 rounded-lg cursor-pointer ${
-                  isDarkMode ? 'hover:bg-[#26272E] text-slate-400 hover:text-white' : 'hover:bg-slate-100 text-slate-500 hover:text-slate-800'
-                }`}
-              >
-                <X size={16} />
-              </button>
-            </div>
-
-            {activeTab === 'Chemistry' && <ChemistryLab isDarkMode={isDarkMode} />}
-            {activeTab === 'Physics' && <PhysicsCircuit isDarkMode={isDarkMode} />}
-            {activeTab === 'Computer Science' && <ComputerSciencePlayground isDarkMode={isDarkMode} />}
-            {activeTab === 'Mathematics' && <MathPlotter isDarkMode={isDarkMode} />}
-          </div>
-        </div>
-      )}
-
-      <nav className={`fixed bottom-0 inset-x-0 z-40 border-t backdrop-blur-md transition-colors ${
-        isDarkMode ? 'bg-[#0B0C0E]/90 border-[#26272E]' : 'bg-white/90 border-slate-200 shadow-lg'
-      }`}>
-        <div className="max-w-4xl mx-auto px-4 py-2 flex items-center justify-around">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(isActive ? null : tab.id)}
-                className={`flex flex-col items-center py-1 px-3 rounded-xl transition-all cursor-pointer ${
-                  isActive 
-                    ? 'bg-indigo-600/15 text-indigo-600 dark:text-indigo-400 font-semibold' 
-                    : isDarkMode 
-                      ? 'text-slate-400 hover:text-white' 
-                      : 'text-slate-500 hover:text-slate-900'
-                }`}
-              >
-                <Icon size={18} className={isActive ? 'text-indigo-600 dark:text-indigo-400' : tab.color} />
-                <span className="text-[10px] font-medium mt-1">{tab.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </nav>
-    </>
   );
 }
 
 // --- MAIN APPLICATION COMPONENT ---
+// Top-level session, theme, navigation, and page composition.
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -669,9 +647,9 @@ export default function App() {
 
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedSubject, setSelectedSubject] = useState('General');
-  const [activeLabTab, setActiveLabTab] = useState(null);
   const [isAiAssistantOpen, setIsAiAssistantOpen] = useState(false);
   const [aiPromptInput, setAiPromptInput] = useState('');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('pastq_theme', theme);
@@ -702,27 +680,43 @@ export default function App() {
     return <BookOpen className="w-5 h-5 text-indigo-500" />;
   };
 
-  const getSubjectLabKey = (subjectName) => {
+  const getSubjectLabTab = (subjectName) => {
     const name = subjectName.toLowerCase();
-    if (name.includes('chemist')) return 'Chemistry';
-    if (name.includes('physic')) return 'Physics';
-    if (name.includes('computer')) return 'Computer Science';
-    if (name.includes('math')) return 'Mathematics';
+    if (name.includes('chemist')) return 'lab-chemistry';
+    if (name.includes('physic')) return 'lab-physics';
+    if (name.includes('computer')) return 'lab-cs';
+    if (name.includes('math')) return 'lab-math';
     return null;
   };
 
+  const navTabs = [
+    { id: 'overview', label: 'Dashboard' },
+    { id: 'papers', label: 'Past Papers' },
+    { id: 'drills', label: 'Topic Drills' },
+    { id: 'saved', label: 'Saved Questions' },
+    { id: 'analytics', label: 'Analytics' }
+  ];
+
+  const labTabs = [
+    { id: 'lab-chemistry', label: 'Chemistry Lab', icon: FlaskConical },
+    { id: 'lab-physics', label: 'Physics Lab', icon: Atom },
+    { id: 'lab-cs', label: 'CS Sandbox', icon: Code },
+    { id: 'lab-math', label: 'Math Visualizer', icon: Calculator },
+  ];
+
   if (currentUser) {
     return (
-      <div className={`min-h-screen transition-colors duration-200 pb-20 font-sans ${
+      <div className={`min-h-screen transition-colors duration-200 pb-12 font-sans ${
         isDarkMode ? 'bg-[#0B0C0E] text-white' : 'bg-slate-50 text-slate-900'
       }`}>
         
         {/* Navigation Bar */}
-        <header className={`border-b px-6 py-4 sticky top-0 z-40 transition-colors ${
+        <header className={`border-b px-4 sm:px-6 py-4 sticky top-0 z-40 transition-colors ${
           isDarkMode ? 'bg-[#141519] border-[#26272E]' : 'bg-white border-slate-200 shadow-sm'
         }`}>
           <div className="max-w-7xl mx-auto flex items-center justify-between">
             
+            {/* Logo */}
             <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setActiveTab('overview')}>
               <div className="w-10 h-10 bg-blue-600/10 border border-blue-500/30 rounded-xl flex items-center justify-center text-blue-600">
                 <BookOpen size={22} />
@@ -735,21 +729,15 @@ export default function App() {
               </div>
             </div>
 
+            {/* Desktop Navigation */}
             <nav className={`hidden md:flex items-center space-x-1 p-1 border rounded-xl text-xs font-semibold ${
               isDarkMode ? 'bg-[#1A1B20] border-[#26272E]' : 'bg-slate-100 border-slate-200'
             }`}>
-              {[
-                { id: 'overview', label: 'Dashboard' },
-                { id: 'papers', label: 'Past Papers' },
-                { id: 'drills', label: 'Topic Drills' },
-                // Keep this ID synchronized with the conditional renderer below and with Dashboard's quick-action ID.
-                { id: 'saved', label: 'Saved Questions' },
-                { id: 'analytics', label: 'Analytics' }
-              ].map((tab) => (
+              {navTabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`px-4 py-2 rounded-lg transition-all cursor-pointer ${
+                  className={`px-3 py-2 rounded-lg transition-all cursor-pointer ${
                     activeTab === tab.id 
                       ? 'bg-blue-600 text-white shadow-md' 
                       : isDarkMode ? 'text-zinc-400 hover:text-white' : 'text-slate-600 hover:text-slate-900'
@@ -758,9 +746,46 @@ export default function App() {
                   {tab.label}
                 </button>
               ))}
+
+              {/* Practical Labs Dropdown Menu */}
+              <div className="relative group px-1">
+                <button 
+                  className={`px-3 py-2 rounded-lg flex items-center gap-1.5 transition-all cursor-pointer ${
+                    activeTab.startsWith('lab-') 
+                      ? 'bg-emerald-600 text-white shadow-md' 
+                      : 'text-emerald-500 hover:bg-emerald-500/10'
+                  }`}
+                >
+                  <FlaskConical size={14} />
+                  <span>Practical Labs</span>
+                </button>
+
+                <div className={`absolute left-0 mt-1 w-48 border rounded-2xl p-2 shadow-xl hidden group-hover:block z-50 animate-in fade-in duration-150 ${
+                  isDarkMode ? 'bg-[#141519] border-[#26272E]' : 'bg-white border-slate-200'
+                }`}>
+                  {labTabs.map((lab) => {
+                    const Icon = lab.icon;
+                    return (
+                      <button
+                        key={lab.id}
+                        onClick={() => setActiveTab(lab.id)}
+                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-left transition-all cursor-pointer ${
+                          activeTab === lab.id 
+                            ? 'bg-emerald-500/20 text-emerald-500 font-bold' 
+                            : isDarkMode ? 'hover:bg-[#1A1B20] text-slate-300' : 'hover:bg-slate-100 text-slate-700'
+                        }`}
+                      >
+                        <Icon size={14} className="text-emerald-500" />
+                        <span>{lab.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </nav>
 
-            <div className="flex items-center space-x-3">
+            {/* Actions & Mobile Menu Toggle */}
+            <div className="flex items-center space-x-2 sm:space-x-3">
               <button
                 onClick={toggleTheme}
                 className={`p-2.5 rounded-xl border transition-all flex items-center justify-center cursor-pointer ${
@@ -781,20 +806,87 @@ export default function App() {
                 <span className="hidden sm:inline">AI Tutor</span>
               </button>
 
-              <div className="text-right hidden sm:block">
-                <div className="text-xs font-bold">{currentUser.nickname}</div>
-                <div className={`text-[10px] ${isDarkMode ? 'text-zinc-400' : 'text-slate-500'}`}>{currentUser.schoolName}</div>
-              </div>
-
               <button
                 onClick={handleLogout}
-                className="p-2.5 text-red-500 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 rounded-xl transition-all cursor-pointer"
+                className="hidden sm:flex p-2.5 text-red-500 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 rounded-xl transition-all cursor-pointer"
                 title="Log Out"
               >
                 <LogOut size={16} />
               </button>
+
+              {/* Hamburger Button */}
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className={`md:hidden p-2.5 rounded-xl border transition-all cursor-pointer ${
+                  isDarkMode ? 'bg-[#1A1B20] border-[#26272E] text-white' : 'bg-slate-100 border-slate-200 text-slate-800'
+                }`}
+              >
+                {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+              </button>
             </div>
           </div>
+
+          {/* Mobile Hamburger Dropdown Menu */}
+          {isMobileMenuOpen && (
+            <div className={`md:hidden mt-4 pt-4 border-t space-y-2 animate-in slide-in-from-top duration-200 ${
+              isDarkMode ? 'border-[#26272E]' : 'border-slate-200'
+            }`}>
+              {navTabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => {
+                    setActiveTab(tab.id);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className={`w-full text-left px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    activeTab === tab.id 
+                      ? 'bg-blue-600 text-white' 
+                      : isDarkMode ? 'text-slate-300 hover:bg-[#1A1B20]' : 'text-slate-700 hover:bg-slate-100'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+
+              {/* Mobile Practical Labs Section */}
+              <div className="pt-2 border-t border-slate-200/20 space-y-1">
+                <div className="px-4 py-1 text-[10px] font-extrabold uppercase text-emerald-500 tracking-wider">
+                  Practical Labs
+                </div>
+                {labTabs.map((lab) => {
+                  const Icon = lab.icon;
+                  return (
+                    <button
+                      key={lab.id}
+                      onClick={() => {
+                        setActiveTab(lab.id);
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className={`w-full text-left px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 cursor-pointer ${
+                        activeTab === lab.id 
+                          ? 'bg-emerald-600 text-white' 
+                          : isDarkMode ? 'text-slate-300 hover:bg-[#1A1B20]' : 'text-slate-700 hover:bg-slate-100'
+                      }`}
+                    >
+                      <Icon size={14} />
+                      <span>{lab.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="pt-2 border-t border-slate-200/20 flex items-center justify-between px-2">
+                <span className="text-xs font-bold opacity-70">{currentUser.nickname} ({currentUser.schoolName})</span>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-1 text-xs text-red-500 font-bold py-1 px-3 bg-red-500/10 rounded-lg cursor-pointer"
+                >
+                  <LogOut size={14} />
+                  <span>Log Out</span>
+                </button>
+              </div>
+            </div>
+          )}
         </header>
 
         {/* Navigation Routing */}
@@ -819,7 +911,6 @@ export default function App() {
           />
         )}
 
-        {/* This tab currently presents the saved-content empty state; persistence should be added behind SavedQuestionsPage. */}
         {activeTab === 'saved' && (
           <SavedQuestionsPage
             isDarkMode={isDarkMode}
@@ -836,6 +927,23 @@ export default function App() {
             isDarkMode={isDarkMode}
             onBack={() => setActiveTab('overview')}
           />
+        )}
+
+        {/* Dedicated Lab Pages */}
+        {activeTab === 'lab-chemistry' && (
+          <ChemistryLabPage isDarkMode={isDarkMode} onBack={() => setActiveTab('overview')} />
+        )}
+
+        {activeTab === 'lab-physics' && (
+          <PhysicsLabPage isDarkMode={isDarkMode} onBack={() => setActiveTab('overview')} />
+        )}
+
+        {activeTab === 'lab-cs' && (
+          <CsLabPage isDarkMode={isDarkMode} onBack={() => setActiveTab('overview')} />
+        )}
+
+        {activeTab === 'lab-math' && (
+          <MathLabPage isDarkMode={isDarkMode} onBack={() => setActiveTab('overview')} />
         )}
 
         {activeTab === 'overview' && (
@@ -899,7 +1007,7 @@ export default function App() {
                   <span>Practical Labs</span>
                   <FlaskConical size={16} className="text-emerald-500" />
                 </div>
-                <div className="text-2xl font-bold">4 Modules</div>
+                <div className="text-2xl font-bold">4 Pages</div>
                 <div className="text-[10px] text-emerald-500 font-medium">Chemistry, Phys, CS, Math</div>
               </div>
 
@@ -917,7 +1025,7 @@ export default function App() {
               <h2 className="text-xs font-extrabold uppercase tracking-wider opacity-60">Your Registered Subjects</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {currentUser.selectedSubjects && currentUser.selectedSubjects.map((subject) => {
-                  const labKey = getSubjectLabKey(subject);
+                  const labTab = getSubjectLabTab(subject);
                   return (
                     <div 
                       key={subject}
@@ -932,7 +1040,7 @@ export default function App() {
                           }`}>
                             {getSubjectIcon(subject)}
                           </div>
-                          {labKey && (
+                          {labTab && (
                             <span className="text-[10px] bg-emerald-500/10 text-emerald-600 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold flex items-center space-x-1">
                               <FlaskConical size={10} />
                               <span>Lab Supported</span>
@@ -948,13 +1056,13 @@ export default function App() {
                       </div>
 
                       <div className="pt-3 border-t border-slate-200/20 flex items-center gap-2">
-                        {labKey && (
+                        {labTab && (
                           <button
-                            onClick={() => setActiveLabTab(labKey)}
+                            onClick={() => setActiveTab(labTab)}
                             className="px-3 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 border border-emerald-500/30 rounded-xl text-xs font-bold transition-all flex items-center space-x-1 cursor-pointer"
                           >
                             <FlaskConical size={14} />
-                            <span>Launch Lab</span>
+                            <span>Open Lab Page</span>
                           </button>
                         )}
                         <button 
@@ -980,12 +1088,6 @@ export default function App() {
 
           </main>
         )}
-
-        <PracticalLabs 
-          isDarkMode={isDarkMode} 
-          activeTab={activeLabTab} 
-          setActiveTab={setActiveLabTab} 
-        />
 
         {/* AI Drawer Side Panel */}
         {isAiAssistantOpen && (

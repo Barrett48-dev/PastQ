@@ -80,7 +80,62 @@ npm run preview  # Serve the production build locally
 
 ## Extending the Project
 
-For a production version, replace `src/utils/auth.js` with an API-backed authentication service, move paper metadata and answer keys to a protected backend, add a real PDF asset or document service, persist attempts and mastery, and connect dashboard subject actions to `SubjectSearch` or a route-based navigation layer.
+For a production version, replace `src/utils/auth.js` with Firebase Authentication, move paper metadata and answer keys to protected Firestore data, store PDFs in Cloud Storage, persist attempts and mastery, and connect dashboard actions to Firebase-backed services.
+
+## Firebase Backend Build Guide
+
+Firebase can provide PastQ's first production backend without a separate server to maintain. Use Firebase Authentication for identity, Cloud Firestore for application data, Cloud Storage for papers, and Cloud Functions for trusted grading and scheduled work.
+
+### Step 1: Create and configure the Firebase project
+
+1. Create a project in the [Firebase Console](https://console.firebase.google.com/) and enable Analytics only if it is required by the product's privacy policy.
+2. Register a Web app and copy its configuration into local environment variables such as `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_STORAGE_BUCKET`, `VITE_FIREBASE_MESSAGING_SENDER_ID`, and `VITE_FIREBASE_APP_ID`.
+3. Install the client SDK with `npm install firebase` and create a single `src/lib/firebase.js` module for initialization. Never put Admin SDK credentials in the browser.
+
+### Step 2: Add authentication
+
+1. Enable Email/Password and any planned providers under **Authentication > Sign-in method**.
+2. Replace the local-storage functions in `src/utils/auth.js` with Firebase Auth calls such as `createUserWithEmailAndPassword`, `signInWithEmailAndPassword`, `onAuthStateChanged`, and `signOut`.
+3. After registration, create `users/{uid}` and `profiles/{uid}` documents in Firestore. Use the Firebase `uid` as the ownership key; do not use email as a document ID.
+4. Keep only non-sensitive preferences in browser storage. Firebase Auth manages credentials and session state.
+
+### Step 3: Model Firestore data
+
+Create collections for `users`, `profiles`, `subjects`, `papers`, `questions`, `attempts`, `attemptAnswers`, `savedQuestions`, `reviewCards`, `studyPlans`, `studyTasks`, `achievements`, and `aiConversations`. Include `createdAt` and `updatedAt` timestamps, stable IDs, and a `contentVersion` or `gradingVersion` for published exam content.
+
+Keep answer keys and unpublished content out of client-readable documents. A question document sent to an active exam should contain options but not `isCorrect`; Cloud Functions should grade the submitted attempt.
+
+### Step 4: Secure the data
+
+1. Write Firestore and Storage Security Rules that require `request.auth != null` and verify `request.auth.uid` for every student-owned document.
+2. Allow students to read only published papers and questions, and allow writes only to their own profiles, attempts, answers, saved questions, and review cards.
+3. Keep answer keys, moderation fields, and role changes restricted to Admin SDK code or custom claims assigned by a trusted admin process.
+4. Add App Check, email verification, rate limits, and emulator-based rule tests before opening the app to real users.
+
+### Step 5: Store and serve papers
+
+Upload PDFs to a private Cloud Storage path such as `papers/{paperId}/document.pdf`. Store only the Storage path and metadata in Firestore. A callable or HTTPS Cloud Function should verify access and return a short-lived signed URL; never expose answer-key files or broad storage credentials.
+
+### Step 6: Build trusted backend functions
+
+Use Cloud Functions for Firebase for operations that must not trust the browser:
+
+- create and expire exam attempts using server timestamps;
+- save answers and enforce attempt ownership;
+- submit and grade attempts idempotently against a versioned answer key;
+- generate dashboard/progress summaries;
+- update achievements and spaced-repetition review dates; and
+- process AI requests without exposing provider API keys.
+
+Use scheduled Functions for cleanup and reminders. Keep function inputs validated and return consistent error codes for the frontend.
+
+### Step 7: Connect the React frontend
+
+Create a small Firebase data layer under `src/lib/` or `src/services/`. Replace hard-coded paper and drill arrays with Firestore queries, subscribe to auth state at the application boundary, and call Functions for grading, signed URLs, progress aggregation, and AI. Add loading, empty, permission, offline, and retry states to each Firebase-backed screen.
+
+### Step 8: Test and deploy
+
+Run the Firebase Local Emulator Suite for Auth, Firestore, Storage, and Functions. Test registration, unauthorized reads, paper publication, autosaved answers, expired attempts, duplicate submission, and admin-only writes. Deploy with `firebase deploy`, build the frontend with `npm run build`, and configure Hosting rewrites and environment-specific projects for development, staging, and production.
 
 ## File-by-File Maintenance Guide
 
